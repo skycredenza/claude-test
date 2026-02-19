@@ -1189,19 +1189,67 @@ function returnToMenu() {
 }
 
 // ----- KEYBOARD HANDLER -----
+// Use capture phase to intercept events BEFORE the browser processes them.
+// This is critical for shortcuts like Ctrl+W, Ctrl+T, Ctrl+Tab, Ctrl+N, etc.
+// that the browser would otherwise consume.
+
+// Block ALL keyboard events during gameplay (capture phase = first chance)
+function blockBrowserShortcuts(e) {
+  if (!gameState.playing) {
+    // Even when not playing, block Tab from shifting focus
+    if (e.key === 'Tab') {
+      e.preventDefault();
+    }
+    return;
+  }
+
+  // Allow ESC through (we handle it ourselves, and it's safe)
+  if (e.key === 'Escape') return;
+
+  // Block everything that involves a modifier key or special key
+  // This prevents the browser from acting on Ctrl+W, Ctrl+T, Ctrl+Tab,
+  // Ctrl+N, Ctrl+Shift+Tab, Alt+Tab (where possible), Alt+F4, F5, etc.
+  const hasModifier = e.ctrlKey || e.altKey || e.metaKey;
+  const isSpecialKey = [
+    'Tab', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10',
+    'F11', 'F12', 'PrintScreen', 'ScrollLock', 'Pause'
+  ].includes(e.key);
+
+  if (hasModifier || isSpecialKey) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+  }
+
+  // Also block Shift+Enter (would submit forms), Backspace (browser back)
+  if ((e.shiftKey && e.key === 'Enter') || e.key === 'Backspace') {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+  }
+}
+
+// Register on capture phase — runs before any other handlers or browser defaults
+document.addEventListener('keydown', blockBrowserShortcuts, true);
+
+// Also block keyup to prevent residual browser actions (e.g. Alt key opening menu bar)
+document.addEventListener('keyup', (e) => {
+  if (!gameState.playing) return;
+  if (e.ctrlKey || e.altKey || e.metaKey || e.key === 'Alt' || e.key === 'Meta') {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}, true);
+
+// Game logic handler (runs in bubble phase, after blocking)
 document.addEventListener('keydown', (e) => {
   if (!gameState.playing || !gameState.currentChallenge) return;
 
   // ESC to return to menu
   if (e.key === 'Escape') {
+    e.preventDefault();
     returnToMenu();
     return;
-  }
-
-  // Prevent default for shortcut keys so browser doesn't act on them
-  if (e.ctrlKey || e.altKey || e.metaKey || e.key === 'Tab' || e.key === 'F5' || e.key === 'F12' || e.key === 'PrintScreen') {
-    e.preventDefault();
-    e.stopPropagation();
   }
 
   // Ignore lone modifier keys
@@ -1219,10 +1267,11 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Prevent tab from leaving the page
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Tab') {
+// Block beforeunload when game is active (catches Ctrl+W close attempts)
+window.addEventListener('beforeunload', (e) => {
+  if (gameState.playing) {
     e.preventDefault();
+    e.returnValue = '';
   }
 });
 
