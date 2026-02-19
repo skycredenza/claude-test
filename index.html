@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickKeys - Keyboard Shortcuts Training Game</title>
+<style>
+  /* ===== RESET & BASE ===== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    overflow: hidden;
+    height: 100vh;
+    user-select: none;
+  }
+
+  /* ===== START SCREEN ===== */
+  #start-screen {
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 1000;
+    transition: opacity 0.5s;
+  }
+  #start-screen.hidden { opacity: 0; pointer-events: none; }
+  #start-screen h1 {
+    font-size: 4rem; color: #e94560;
+    text-shadow: 0 0 30px rgba(233,69,96,0.5);
+    margin-bottom: 0.5rem;
+  }
+  #start-screen h1 span { color: #fff; }
+  #start-screen .subtitle {
+    font-size: 1.3rem; color: #aaa; margin-bottom: 2rem;
+  }
+  .level-select { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center; }
+  .level-btn {
+    padding: 1rem 2rem; border: 2px solid #e94560;
+    background: transparent; color: #fff; font-size: 1.1rem;
+    border-radius: 12px; cursor: pointer; transition: all 0.3s;
+    min-width: 200px;
+  }
+  .level-btn:hover { background: #e94560; transform: translateY(-3px); box-shadow: 0 8px 25px rgba(233,69,96,0.3); }
+  .level-btn .level-name { font-weight: bold; display: block; margin-bottom: 0.3rem; }
+  .level-btn .level-desc { font-size: 0.8rem; color: #ccc; }
+  .level-btn:hover .level-desc { color: #fff; }
+
+  /* ===== GAME CONTAINER ===== */
+  #game-container {
+    display: none; height: 100vh;
+    flex-direction: column;
+  }
+  #game-container.active { display: flex; }
+
+  /* ===== TOP BAR (taskbar-like) ===== */
+  #top-bar {
+    background: #16213e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 2px solid #0f3460;
+    flex-shrink: 0;
+  }
+  #score-display { font-size: 1.1rem; }
+  #score-display span { color: #e94560; font-weight: bold; }
+  #streak-display { font-size: 0.9rem; color: #aaa; }
+  #streak-display span { color: #ffd700; font-weight: bold; }
+  #level-indicator { font-size: 0.9rem; color: #aaa; }
+  #timer-bar {
+    height: 4px; background: #333; border-radius: 2px;
+    overflow: hidden; flex-shrink: 0;
+  }
+  #timer-fill {
+    height: 100%; background: linear-gradient(90deg, #e94560, #ffd700);
+    transition: width 0.1s linear; width: 100%;
+  }
+
+  /* ===== CHALLENGE AREA ===== */
+  #challenge-area {
+    background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
+    padding: 16px 24px;
+    text-align: center;
+    flex-shrink: 0;
+    min-height: 130px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  #challenge-instruction {
+    font-size: 1.6rem; font-weight: bold; color: #fff;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  #shortcut-hint {
+    font-size: 1.3rem; color: #e94560;
+    padding: 6px 20px;
+    background: rgba(233,69,96,0.1);
+    border: 1px solid rgba(233,69,96,0.3);
+    border-radius: 8px;
+    display: inline-block;
+    transition: opacity 0.3s;
+    min-height: 42px;
+  }
+  #shortcut-hint.delayed {
+    opacity: 0;
+  }
+  #shortcut-hint.revealed {
+    opacity: 1;
+  }
+  #hint-countdown {
+    font-size: 0.9rem; color: #888;
+    margin-top: 4px; min-height: 20px;
+  }
+
+  /* ===== SIMULATED DESKTOP ===== */
+  #desktop {
+    flex: 1; position: relative;
+    background: #0d1b2a;
+    overflow: hidden;
+    padding: 8px;
+  }
+
+  /* --- Simulated Windows --- */
+  .sim-window {
+    position: absolute;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    transition: box-shadow 0.3s, transform 0.3s;
+    display: flex; flex-direction: column;
+  }
+  .sim-window.active-window {
+    box-shadow: 0 6px 30px rgba(233,69,96,0.3);
+    z-index: 10;
+  }
+  .sim-window .title-bar {
+    height: 32px; padding: 0 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: #2d3436;
+    flex-shrink: 0;
+  }
+  .sim-window.active-window .title-bar { background: #0f3460; }
+  .sim-window .title-bar .title { font-size: 0.8rem; color: #ccc; }
+  .sim-window.active-window .title-bar .title { color: #fff; }
+  .sim-window .window-controls { display: flex; gap: 6px; }
+  .sim-window .window-controls span {
+    width: 12px; height: 12px; border-radius: 50%;
+    display: inline-block;
+  }
+  .sim-window .window-controls .ctrl-close { background: #e94560; }
+  .sim-window .window-controls .ctrl-min { background: #ffd700; }
+  .sim-window .window-controls .ctrl-max { background: #4caf50; }
+  .sim-window .window-body {
+    flex: 1; padding: 12px;
+    background: #1e272e;
+    font-size: 0.85rem; color: #bbb;
+    overflow: auto;
+  }
+
+  /* --- Tabs inside windows --- */
+  .tab-bar {
+    display: flex; background: #2d3436; flex-shrink: 0;
+  }
+  .tab {
+    padding: 6px 16px; font-size: 0.75rem;
+    color: #999; background: #2d3436;
+    border-right: 1px solid #444;
+    cursor: default; position: relative;
+  }
+  .tab.active-tab { background: #1e272e; color: #fff; }
+
+  /* --- Flashing animation --- */
+  @keyframes flash-tab {
+    0%, 100% { background: #2d3436; }
+    50% { background: #e94560; color: #fff; }
+  }
+  .tab.flashing { animation: flash-tab 0.8s infinite; }
+
+  @keyframes flash-window {
+    0%, 100% { box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    50% { box-shadow: 0 6px 35px rgba(233,69,96,0.6); }
+  }
+  .sim-window.flashing { animation: flash-window 0.8s infinite; }
+
+  @keyframes pulse-border {
+    0%, 100% { border-color: transparent; }
+    50% { border-color: #e94560; }
+  }
+
+  /* --- Clipboard visual --- */
+  #clipboard-indicator {
+    position: fixed; bottom: 60px; right: 16px;
+    background: #16213e; border: 1px solid #333;
+    border-radius: 8px; padding: 8px 14px;
+    font-size: 0.8rem; color: #aaa;
+    z-index: 50;
+  }
+  #clipboard-indicator strong { color: #e94560; }
+
+  /* --- Simulated Taskbar --- */
+  #taskbar {
+    height: 44px; background: #16213e;
+    border-top: 2px solid #0f3460;
+    display: flex; align-items: center;
+    padding: 0 12px; gap: 6px;
+    flex-shrink: 0;
+  }
+  .taskbar-item {
+    padding: 5px 14px; background: #2d3436;
+    border-radius: 4px; font-size: 0.75rem;
+    color: #bbb; border: 1px solid transparent;
+    cursor: default;
+  }
+  .taskbar-item.tb-active { background: #0f3460; color: #fff; border-color: #e94560; }
+  .taskbar-item.tb-flashing { animation: flash-tab 0.8s infinite; }
+
+  /* ===== FEEDBACK OVERLAY ===== */
+  #feedback-overlay {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; z-index: 100;
+  }
+  #feedback-message {
+    font-size: 3rem; font-weight: bold;
+    padding: 20px 50px; border-radius: 16px;
+    opacity: 0; transform: scale(0.8);
+    transition: all 0.3s;
+  }
+  #feedback-message.correct {
+    color: #4caf50; background: rgba(76,175,80,0.15);
+    border: 2px solid rgba(76,175,80,0.3);
+    opacity: 1; transform: scale(1);
+  }
+  #feedback-message.incorrect {
+    color: #e94560; background: rgba(233,69,96,0.15);
+    border: 2px solid rgba(233,69,96,0.3);
+    opacity: 1; transform: scale(1);
+  }
+  #feedback-message.streak {
+    color: #ffd700; background: rgba(255,215,0,0.15);
+    border: 2px solid rgba(255,215,0,0.3);
+    opacity: 1; transform: scale(1);
+  }
+
+  /* ===== SELECTION HIGHLIGHT ===== */
+  .text-selected {
+    background: #3390ff !important;
+    color: #fff !important;
+  }
+
+  /* ===== RESULT SCREEN ===== */
+  #result-screen {
+    position: fixed; inset: 0;
+    background: rgba(26,26,46,0.95);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 200;
+  }
+  #result-screen.active { display: flex; }
+  #result-screen h2 { font-size: 2.5rem; color: #e94560; margin-bottom: 1rem; }
+  #result-screen .stat { font-size: 1.2rem; color: #ccc; margin: 0.3rem 0; }
+  #result-screen .stat span { color: #ffd700; font-weight: bold; }
+  #result-screen button {
+    margin-top: 2rem; padding: 12px 40px;
+    background: #e94560; border: none; color: #fff;
+    font-size: 1.1rem; border-radius: 8px; cursor: pointer;
+    transition: transform 0.2s;
+  }
+  #result-screen button:hover { transform: translateY(-2px); }
+
+  /* ===== KEYBOARD VISUAL ===== */
+  .key-visual {
+    display: inline-block;
+    background: #2d3436;
+    border: 1px solid #555;
+    border-bottom: 3px solid #444;
+    border-radius: 5px;
+    padding: 2px 10px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 1.1rem;
+    color: #fff;
+    margin: 0 2px;
+    min-width: 30px;
+    text-align: center;
+  }
+
+  /* ===== DRAG INSTRUCTION VISUAL ===== */
+  .drag-demo {
+    display: inline-block;
+    color: #ffd700;
+    font-style: italic;
+  }
+
+  /* ===== PROGRESS DOTS ===== */
+  #progress-bar {
+    display: flex; gap: 6px;
+    justify-content: center;
+    padding: 4px 0;
+    flex-shrink: 0;
+    background: #16213e;
+  }
+  .progress-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #333;
+    transition: background 0.3s;
+  }
+  .progress-dot.done { background: #4caf50; }
+  .progress-dot.current { background: #e94560; }
+  .progress-dot.wrong { background: #ff6b6b; }
+
+  /* ===== SNIPPING TOOL OVERLAY ===== */
+  #snip-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 80;
+    cursor: crosshair;
+  }
+  #snip-overlay.active { display: block; }
+  #snip-selection {
+    position: absolute;
+    border: 2px dashed #e94560;
+    background: rgba(233,69,96,0.1);
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== START SCREEN ===== -->
+<div id="start-screen">
+  <h1>Quick<span>Keys</span></h1>
+  <p class="subtitle">Master Your Keyboard Shortcuts</p>
+  <div class="level-select">
+    <button class="level-btn" onclick="startGame('beginner')">
+      <span class="level-name">Beginner</span>
+      <span class="level-desc">Hints shown immediately. Learn the shortcuts!</span>
+    </button>
+    <button class="level-btn" onclick="startGame('intermediate')">
+      <span class="level-name">Intermediate</span>
+      <span class="level-desc">Hints delayed 5 seconds. Test your memory!</span>
+    </button>
+    <button class="level-btn" onclick="startGame('expert')">
+      <span class="level-name">Expert</span>
+      <span class="level-desc">No hints + time pressure. Prove mastery!</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== GAME CONTAINER ===== -->
+<div id="game-container">
+  <div id="top-bar">
+    <div>
+      <div id="score-display">Score: <span id="score">0</span></div>
+      <div id="streak-display">Streak: <span id="streak">0</span></div>
+    </div>
+    <div id="level-indicator">BEGINNER</div>
+    <div style="text-align:right">
+      <div id="challenge-counter">1 / 20</div>
+      <div style="font-size:0.8rem;color:#888;cursor:pointer" onclick="returnToMenu()">ESC = Menu</div>
+    </div>
+  </div>
+  <div id="timer-bar"><div id="timer-fill"></div></div>
+  <div id="progress-bar"></div>
+
+  <div id="challenge-area">
+    <div id="challenge-instruction">Press Start to begin!</div>
+    <div id="shortcut-hint"></div>
+    <div id="hint-countdown"></div>
+  </div>
+
+  <div id="desktop">
+    <!-- Windows are generated by JS -->
+  </div>
+
+  <div id="clipboard-indicator">Clipboard: <strong id="clipboard-content">(empty)</strong></div>
+
+  <div id="taskbar"></div>
+</div>
+
+<!-- ===== FEEDBACK OVERLAY ===== -->
+<div id="feedback-overlay">
+  <div id="feedback-message"></div>
+</div>
+
+<!-- ===== SNIP OVERLAY ===== -->
+<div id="snip-overlay" id="snip-overlay">
+  <div id="snip-selection"></div>
+</div>
+
+<!-- ===== RESULT SCREEN ===== -->
+<div id="result-screen">
+  <h2 id="result-title">Round Complete!</h2>
+  <div class="stat">Score: <span id="final-score">0</span></div>
+  <div class="stat">Correct: <span id="final-correct">0</span> / <span id="final-total">20</span></div>
+  <div class="stat">Best Streak: <span id="final-streak">0</span></div>
+  <div class="stat">Accuracy: <span id="final-accuracy">0%</span></div>
+  <button onclick="returnToMenu()">Play Again</button>
+</div>
+
+<script>
+// ===================================================================
+// QuickKeys - Keyboard Shortcuts Training Game
+// ===================================================================
+
+// ----- STATE -----
+let gameState = {
+  level: 'beginner',
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  currentChallenge: null,
+  challengeIndex: 0,
+  totalChallenges: 20,
+  correct: 0,
+  incorrect: 0,
+  hintTimer: null,
+  challengeTimer: null,
+  timeLeft: 0,
+  clipboard: '',
+  activeWindowId: 'win-browser',
+  activeTabIndex: 0,
+  textSelections: {},
+  playing: false,
+  challenges: [],
+};
+
+// ----- WINDOWS CONFIGURATION -----
+const windows = [
+  {
+    id: 'win-browser',
+    title: 'Browser - Google Chrome',
+    icon: 'browser',
+    x: 20, y: 10, w: 520, h: 320,
+    tabs: ['Google Search', 'Wikipedia', 'YouTube', 'Gmail'],
+    bodies: [
+      'Search the web for anything...\n\nTrending: Keyboard shortcuts, Productivity tips, How to be faster at your computer',
+      'Wikipedia - The Free Encyclopedia\n\nKeyboard shortcuts are key combinations that provide quick access to functions that would otherwise require multiple mouse clicks.',
+      'YouTube - Watch Videos\n\n> Top Video: "10 Keyboard Shortcuts Everyone Should Know"\n> 2.4M views',
+      'Gmail - Inbox (3)\n\nFrom: Teacher\nSubject: Great job on your shortcuts!\n\nFrom: Study Group\nSubject: Meeting notes attached\n\nFrom: Newsletter\nSubject: Weekly productivity tips'
+    ]
+  },
+  {
+    id: 'win-document',
+    title: 'Document - Microsoft Word',
+    icon: 'doc',
+    x: 280, y: 60, w: 480, h: 300,
+    tabs: null,
+    body: 'The quick brown fox jumps over the lazy dog.\n\nThis is a sample document for practicing keyboard shortcuts. You can select text, copy it, paste it, and more.\n\nParagraph 3: Learning keyboard shortcuts can save you hours of time every week. Studies show that proficient typists who use shortcuts are 30% more productive.\n\nRemember to practice daily!'
+  },
+  {
+    id: 'win-notepad',
+    title: 'Notepad',
+    icon: 'note',
+    x: 80, y: 180, w: 400, h: 230,
+    tabs: null,
+    body: 'Notes:\n- Practice Ctrl+C and Ctrl+V\n- Learn window switching with Alt+Tab\n- Try selecting text with Shift+Arrow keys\n- Use Ctrl+Tab to switch browser tabs'
+  },
+  {
+    id: 'win-explorer',
+    title: 'File Explorer',
+    icon: 'folder',
+    x: 400, y: 140, w: 420, h: 260,
+    tabs: null,
+    body: 'Documents/\n  homework.docx\n  notes.txt\n  presentation.pptx\nPictures/\n  screenshot1.png\n  screenshot2.png\nDownloads/\n  keyboard-guide.pdf'
+  }
+];
+
+// ----- CHALLENGE DEFINITIONS -----
+const allChallenges = [
+  // === TAB SWITCHING ===
+  {
+    category: 'Tab Navigation',
+    instruction: 'Switch to the NEXT TAB in the browser!',
+    detail: 'The browser has multiple tabs open. Move to the next one.',
+    keys: ['Ctrl', 'Tab'],
+    keyCode: { ctrlKey: true, key: 'Tab' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; s.activeTabIndex = 0; },
+    verify: (e) => e.ctrlKey && !e.shiftKey && e.key === 'Tab',
+    visual: 'flash-next-tab',
+  },
+  {
+    category: 'Tab Navigation',
+    instruction: 'Switch to the PREVIOUS TAB in the browser!',
+    detail: 'Go back to the previous browser tab.',
+    keys: ['Ctrl', 'Shift', 'Tab'],
+    keyCode: { ctrlKey: true, shiftKey: true, key: 'Tab' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; s.activeTabIndex = 2; },
+    verify: (e) => e.ctrlKey && e.shiftKey && e.key === 'Tab',
+    visual: 'flash-prev-tab',
+  },
+  {
+    category: 'Tab Navigation',
+    instruction: 'Jump to the 3rd tab in the browser!',
+    detail: 'Go directly to tab number 3 (YouTube).',
+    keys: ['Ctrl', '3'],
+    keyCode: { ctrlKey: true, key: '3' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; s.activeTabIndex = 0; },
+    verify: (e) => e.ctrlKey && e.key === '3',
+    visual: 'flash-tab-3',
+  },
+  {
+    category: 'Tab Navigation',
+    instruction: 'Open a NEW TAB in the browser!',
+    detail: 'Create a brand new empty tab.',
+    keys: ['Ctrl', 'T'],
+    keyCode: { ctrlKey: true, key: 't' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 't',
+    visual: 'none',
+  },
+  {
+    category: 'Tab Navigation',
+    instruction: 'CLOSE the current browser tab!',
+    detail: 'Close the tab you are currently viewing.',
+    keys: ['Ctrl', 'W'],
+    keyCode: { ctrlKey: true, key: 'w' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; s.activeTabIndex = 1; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 'w',
+    visual: 'flash-current-tab',
+  },
+
+  // === WINDOW SWITCHING ===
+  {
+    category: 'Window Switching',
+    instruction: 'Switch to the NEXT WINDOW using Alt+Tab!',
+    detail: 'The Document window needs your attention.',
+    keys: ['Alt', 'Tab'],
+    keyCode: { altKey: true, key: 'Tab' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; },
+    verify: (e) => e.altKey && e.key === 'Tab',
+    visual: 'flash-window-document',
+  },
+  {
+    category: 'Window Switching',
+    instruction: 'Switch windows! Notepad is flashing in the taskbar!',
+    detail: 'Use Alt+Tab to switch between open windows.',
+    keys: ['Alt', 'Tab'],
+    keyCode: { altKey: true, key: 'Tab' },
+    setup: (s) => { s.activeWindowId = 'win-document'; },
+    verify: (e) => e.altKey && e.key === 'Tab',
+    visual: 'flash-window-notepad',
+  },
+  {
+    category: 'Window Switching',
+    instruction: 'MINIMIZE the current window!',
+    detail: 'Minimize to the taskbar using the keyboard.',
+    keys: ['Win', 'Down'],
+    keyCode: { metaKey: true, key: 'ArrowDown' },
+    // Fallback: accept Alt+Space then N, or just the Win+Down combo
+    verify: (e) => (e.metaKey && e.key === 'ArrowDown') || (e.altKey && e.key === 'ArrowDown'),
+    visual: 'none',
+    altHint: 'Also: Alt + \u2193 (some systems)',
+  },
+
+  // === COPY / PASTE ===
+  {
+    category: 'Copy & Paste',
+    instruction: 'COPY the selected text!',
+    detail: 'The highlighted text in the document needs to be copied.',
+    keys: ['Ctrl', 'C'],
+    keyCode: { ctrlKey: true, key: 'c' },
+    setup: (s) => { s.activeWindowId = 'win-document'; s.textSelections = { 'win-document': 'The quick brown fox' }; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 'c',
+    visual: 'select-text',
+  },
+  {
+    category: 'Copy & Paste',
+    instruction: 'PASTE text into Notepad!',
+    detail: 'Paste what you copied into the notepad.',
+    keys: ['Ctrl', 'V'],
+    keyCode: { ctrlKey: true, key: 'v' },
+    setup: (s) => { s.activeWindowId = 'win-notepad'; s.clipboard = 'The quick brown fox'; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 'v',
+    visual: 'none',
+  },
+  {
+    category: 'Copy & Paste',
+    instruction: 'CUT the selected text!',
+    detail: 'Cut removes the text AND copies it to clipboard.',
+    keys: ['Ctrl', 'X'],
+    keyCode: { ctrlKey: true, key: 'x' },
+    setup: (s) => { s.activeWindowId = 'win-document'; s.textSelections = { 'win-document': 'lazy dog' }; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 'x',
+    visual: 'select-text',
+  },
+
+  // === SELECT ALL / UNDO / REDO ===
+  {
+    category: 'Editing',
+    instruction: 'SELECT ALL text in the document!',
+    detail: 'Highlight everything in the current document.',
+    keys: ['Ctrl', 'A'],
+    keyCode: { ctrlKey: true, key: 'a' },
+    setup: (s) => { s.activeWindowId = 'win-document'; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 'a',
+    visual: 'none',
+  },
+  {
+    category: 'Editing',
+    instruction: 'UNDO your last action!',
+    detail: 'Made a mistake? Undo it!',
+    keys: ['Ctrl', 'Z'],
+    keyCode: { ctrlKey: true, key: 'z' },
+    setup: (s) => { s.activeWindowId = 'win-document'; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 'z',
+    visual: 'none',
+  },
+  {
+    category: 'Editing',
+    instruction: 'REDO what you just undid!',
+    detail: 'Changed your mind? Redo the action.',
+    keys: ['Ctrl', 'Y'],
+    keyCode: { ctrlKey: true, key: 'y' },
+    setup: (s) => { s.activeWindowId = 'win-document'; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 'y',
+    visual: 'none',
+  },
+
+  // === SAVE / PRINT / FIND ===
+  {
+    category: 'File Operations',
+    instruction: 'SAVE the document!',
+    detail: 'Save your work before it\'s too late!',
+    keys: ['Ctrl', 'S'],
+    keyCode: { ctrlKey: true, key: 's' },
+    setup: (s) => { s.activeWindowId = 'win-document'; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 's',
+    visual: 'none',
+  },
+  {
+    category: 'File Operations',
+    instruction: 'Open the FIND dialog to search for text!',
+    detail: 'Need to find something? Search for it!',
+    keys: ['Ctrl', 'F'],
+    keyCode: { ctrlKey: true, key: 'f' },
+    setup: (s) => { s.activeWindowId = 'win-document'; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 'f',
+    visual: 'none',
+  },
+  {
+    category: 'File Operations',
+    instruction: 'PRINT the document!',
+    detail: 'Send the document to the printer.',
+    keys: ['Ctrl', 'P'],
+    keyCode: { ctrlKey: true, key: 'p' },
+    setup: (s) => { s.activeWindowId = 'win-document'; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 'p',
+    visual: 'none',
+  },
+
+  // === LINE BREAK / MESSAGING ===
+  {
+    category: 'Special Actions',
+    instruction: 'Insert a LINE BREAK without sending (like in chat apps)!',
+    detail: 'In chat/email, Shift+Enter makes a new line instead of sending.',
+    keys: ['Shift', 'Enter'],
+    keyCode: { shiftKey: true, key: 'Enter' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; s.activeTabIndex = 3; },
+    verify: (e) => e.shiftKey && e.key === 'Enter',
+    visual: 'none',
+  },
+
+  // === SCREENSHOT / SNIPPING ===
+  {
+    category: 'Screenshots',
+    instruction: 'Take a SCREENSHOT of the entire screen!',
+    detail: 'Capture everything you see on screen.',
+    keys: ['PrtSc'],
+    keyCode: { key: 'PrintScreen' },
+    setup: (s) => {},
+    verify: (e) => e.key === 'PrintScreen' || (e.ctrlKey && e.key.toLowerCase() === 'p' && e.shiftKey),
+    // Many keyboards can't send PrtSc to browser. Accept alternative:
+    altVerify: (e) => e.key === 'F12',
+    altHint: 'Tip: Browser blocks PrtSc. Press F12 as alternative in this game.',
+    visual: 'none',
+  },
+  {
+    category: 'Screenshots',
+    instruction: 'Open the SNIPPING TOOL to capture part of the screen!',
+    detail: 'Select an area to screenshot.',
+    keys: ['Win', 'Shift', 'S'],
+    keyCode: { metaKey: true, shiftKey: true, key: 's' },
+    setup: (s) => {},
+    verify: (e) => (e.metaKey && e.shiftKey && e.key.toLowerCase() === 's') || (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's'),
+    altHint: 'Tip: Use Ctrl+Shift+S as alternative in this game.',
+    visual: 'none',
+  },
+
+  // === BROWSER NAVIGATION ===
+  {
+    category: 'Browser',
+    instruction: 'Go BACK to the previous page!',
+    detail: 'Navigate back in browser history.',
+    keys: ['Alt', '\u2190'],
+    keyCode: { altKey: true, key: 'ArrowLeft' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; s.activeTabIndex = 0; },
+    verify: (e) => e.altKey && e.key === 'ArrowLeft',
+    visual: 'none',
+  },
+  {
+    category: 'Browser',
+    instruction: 'REFRESH the current page!',
+    detail: 'Reload the page to see the latest version.',
+    keys: ['Ctrl', 'R'],
+    keyCode: { ctrlKey: true, key: 'r' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; },
+    // Also accept F5
+    verify: (e) => (e.ctrlKey && e.key.toLowerCase() === 'r') || e.key === 'F5',
+    altHint: 'Also: F5',
+    visual: 'none',
+  },
+  {
+    category: 'Browser',
+    instruction: 'Jump to the ADDRESS BAR!',
+    detail: 'Select the URL bar to type a new address.',
+    keys: ['Ctrl', 'L'],
+    keyCode: { ctrlKey: true, key: 'l' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; },
+    verify: (e) => e.ctrlKey && e.key.toLowerCase() === 'l',
+    altHint: 'Also: Alt+D or F6',
+    visual: 'none',
+  },
+
+  // === WINDOW MANAGEMENT ===
+  {
+    category: 'Window Management',
+    instruction: 'SNAP the window to the LEFT half of the screen!',
+    detail: 'Arrange windows side by side.',
+    keys: ['Win', '\u2190'],
+    keyCode: { metaKey: true, key: 'ArrowLeft' },
+    setup: (s) => { s.activeWindowId = 'win-document'; },
+    verify: (e) => (e.metaKey && e.key === 'ArrowLeft') || (e.ctrlKey && e.metaKey && e.key === 'ArrowLeft'),
+    altHint: 'Tip: Uses Win key. Browser may block this.',
+    visual: 'none',
+  },
+  {
+    category: 'Window Management',
+    instruction: 'CLOSE the current window completely!',
+    detail: 'Shut down the application.',
+    keys: ['Alt', 'F4'],
+    keyCode: { altKey: true, key: 'F4' },
+    setup: (s) => { s.activeWindowId = 'win-notepad'; },
+    verify: (e) => e.altKey && e.key === 'F4',
+    visual: 'flash-window-notepad',
+  },
+
+  // === TEXT SELECTION ===
+  {
+    category: 'Text Selection',
+    instruction: 'Select the next WORD to the right!',
+    detail: 'Extend your selection one word at a time.',
+    keys: ['Ctrl', 'Shift', '\u2192'],
+    keyCode: { ctrlKey: true, shiftKey: true, key: 'ArrowRight' },
+    setup: (s) => { s.activeWindowId = 'win-document'; },
+    verify: (e) => e.ctrlKey && e.shiftKey && e.key === 'ArrowRight',
+    visual: 'none',
+  },
+  {
+    category: 'Text Selection',
+    instruction: 'Select from cursor to the END of the line!',
+    detail: 'Grab everything from here to the end.',
+    keys: ['Shift', 'End'],
+    keyCode: { shiftKey: true, key: 'End' },
+    setup: (s) => { s.activeWindowId = 'win-document'; },
+    verify: (e) => e.shiftKey && e.key === 'End',
+    visual: 'none',
+  },
+  {
+    category: 'Text Selection',
+    instruction: 'Jump to the very BEGINNING of the document!',
+    detail: 'Go to the top of the document instantly.',
+    keys: ['Ctrl', 'Home'],
+    keyCode: { ctrlKey: true, key: 'Home' },
+    setup: (s) => { s.activeWindowId = 'win-document'; },
+    verify: (e) => e.ctrlKey && e.key === 'Home',
+    visual: 'none',
+  },
+
+  // === ZOOM ===
+  {
+    category: 'View',
+    instruction: 'ZOOM IN on the page!',
+    detail: 'Make everything bigger.',
+    keys: ['Ctrl', '+'],
+    keyCode: { ctrlKey: true, key: '+' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; },
+    verify: (e) => e.ctrlKey && (e.key === '+' || e.key === '='),
+    visual: 'none',
+  },
+  {
+    category: 'View',
+    instruction: 'Reset zoom to DEFAULT size!',
+    detail: 'Return to 100% zoom level.',
+    keys: ['Ctrl', '0'],
+    keyCode: { ctrlKey: true, key: '0' },
+    setup: (s) => { s.activeWindowId = 'win-browser'; },
+    verify: (e) => e.ctrlKey && e.key === '0',
+    visual: 'none',
+  },
+];
+
+// ----- RENDER DESKTOP -----
+function renderDesktop() {
+  const desktop = document.getElementById('desktop');
+  const taskbar = document.getElementById('taskbar');
+  desktop.innerHTML = '';
+  taskbar.innerHTML = '';
+
+  windows.forEach(win => {
+    // -- Window element --
+    const el = document.createElement('div');
+    el.className = 'sim-window' + (win.id === gameState.activeWindowId ? ' active-window' : '');
+    el.id = win.id;
+    el.style.cssText = `left:${win.x}px;top:${win.y}px;width:${win.w}px;height:${win.h}px;`;
+
+    // Title bar
+    const titleBar = document.createElement('div');
+    titleBar.className = 'title-bar';
+    titleBar.innerHTML = `
+      <span class="title">${win.title}</span>
+      <span class="window-controls">
+        <span class="ctrl-min"></span>
+        <span class="ctrl-max"></span>
+        <span class="ctrl-close"></span>
+      </span>`;
+    el.appendChild(titleBar);
+
+    // Tabs (if browser)
+    if (win.tabs) {
+      const tabBar = document.createElement('div');
+      tabBar.className = 'tab-bar';
+      win.tabs.forEach((tabName, i) => {
+        const tab = document.createElement('div');
+        tab.className = 'tab' + (i === gameState.activeTabIndex && win.id === gameState.activeWindowId ? ' active-tab' : '');
+        tab.textContent = tabName;
+        tab.dataset.tabIndex = i;
+        tabBar.appendChild(tab);
+      });
+      el.appendChild(tabBar);
+    }
+
+    // Body
+    const body = document.createElement('div');
+    body.className = 'window-body';
+    body.id = win.id + '-body';
+    if (win.tabs) {
+      const tabIdx = win.id === gameState.activeWindowId ? gameState.activeTabIndex : 0;
+      body.textContent = win.bodies[tabIdx];
+    } else {
+      body.textContent = win.body;
+    }
+    // Apply text selection visual if needed
+    if (gameState.textSelections[win.id]) {
+      const selText = gameState.textSelections[win.id];
+      const full = body.textContent;
+      const idx = full.indexOf(selText);
+      if (idx >= 0) {
+        body.innerHTML = escapeHtml(full.substring(0, idx))
+          + '<span class="text-selected">' + escapeHtml(selText) + '</span>'
+          + escapeHtml(full.substring(idx + selText.length));
+      }
+    }
+    el.appendChild(body);
+    desktop.appendChild(el);
+
+    // -- Taskbar item --
+    const tbItem = document.createElement('div');
+    tbItem.className = 'taskbar-item' + (win.id === gameState.activeWindowId ? ' tb-active' : '');
+    tbItem.id = 'tb-' + win.id;
+    tbItem.textContent = win.title.split(' - ')[0];
+    taskbar.appendChild(tbItem);
+  });
+
+  // Clipboard indicator
+  document.getElementById('clipboard-content').textContent = gameState.clipboard || '(empty)';
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ----- PROGRESS BAR -----
+function renderProgress() {
+  const bar = document.getElementById('progress-bar');
+  bar.innerHTML = '';
+  for (let i = 0; i < gameState.totalChallenges; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'progress-dot';
+    if (i < gameState.challengeIndex) dot.classList.add('done');
+    if (i === gameState.challengeIndex) dot.classList.add('current');
+    bar.appendChild(dot);
+  }
+}
+
+// ----- VISUALS / FLASHING -----
+function applyVisual(visual) {
+  clearVisuals();
+  if (!visual || visual === 'none') return;
+
+  if (visual === 'flash-next-tab') {
+    const nextIdx = (gameState.activeTabIndex + 1) % 4;
+    const tabs = document.querySelectorAll(`#${gameState.activeWindowId} .tab`);
+    if (tabs[nextIdx]) tabs[nextIdx].classList.add('flashing');
+  }
+  if (visual === 'flash-prev-tab') {
+    const prevIdx = (gameState.activeTabIndex - 1 + 4) % 4;
+    const tabs = document.querySelectorAll(`#${gameState.activeWindowId} .tab`);
+    if (tabs[prevIdx]) tabs[prevIdx].classList.add('flashing');
+  }
+  if (visual === 'flash-tab-3') {
+    const tabs = document.querySelectorAll(`#win-browser .tab`);
+    if (tabs[2]) tabs[2].classList.add('flashing');
+  }
+  if (visual === 'flash-current-tab') {
+    const tabs = document.querySelectorAll(`#${gameState.activeWindowId} .tab`);
+    if (tabs[gameState.activeTabIndex]) tabs[gameState.activeTabIndex].classList.add('flashing');
+  }
+  if (visual === 'flash-window-document') {
+    const win = document.getElementById('win-document');
+    if (win) win.classList.add('flashing');
+    const tb = document.getElementById('tb-win-document');
+    if (tb) tb.classList.add('tb-flashing');
+  }
+  if (visual === 'flash-window-notepad') {
+    const win = document.getElementById('win-notepad');
+    if (win) win.classList.add('flashing');
+    const tb = document.getElementById('tb-win-notepad');
+    if (tb) tb.classList.add('tb-flashing');
+  }
+  if (visual === 'select-text') {
+    // text selection is handled in renderDesktop
+  }
+}
+
+function clearVisuals() {
+  document.querySelectorAll('.flashing').forEach(el => el.classList.remove('flashing'));
+  document.querySelectorAll('.tb-flashing').forEach(el => el.classList.remove('tb-flashing'));
+}
+
+// ----- HINT DISPLAY -----
+function formatKeys(keys) {
+  return keys.map(k => `<span class="key-visual">${k}</span>`).join(' + ');
+}
+
+function showHint(challenge) {
+  const hintEl = document.getElementById('shortcut-hint');
+  const countdownEl = document.getElementById('hint-countdown');
+  let hintHtml = formatKeys(challenge.keys);
+  if (challenge.altHint) {
+    hintHtml += `<br><span style="font-size:0.8rem;color:#888">${challenge.altHint}</span>`;
+  }
+
+  if (gameState.level === 'beginner') {
+    hintEl.innerHTML = hintHtml;
+    hintEl.classList.remove('delayed');
+    hintEl.classList.add('revealed');
+    countdownEl.textContent = '';
+  } else if (gameState.level === 'intermediate') {
+    hintEl.innerHTML = hintHtml;
+    hintEl.classList.add('delayed');
+    hintEl.classList.remove('revealed');
+    countdownEl.textContent = 'Hint in 5 seconds... Try it yourself first!';
+    let countdown = 5;
+    gameState.hintTimer = setInterval(() => {
+      countdown--;
+      if (countdown <= 0) {
+        clearInterval(gameState.hintTimer);
+        hintEl.classList.remove('delayed');
+        hintEl.classList.add('revealed');
+        countdownEl.textContent = '';
+      } else {
+        countdownEl.textContent = `Hint in ${countdown} seconds...`;
+      }
+    }, 1000);
+  } else {
+    // Expert: no hints at all
+    hintEl.innerHTML = '<span style="color:#666">No hints in Expert mode!</span>';
+    hintEl.classList.remove('delayed');
+    hintEl.classList.add('revealed');
+    countdownEl.textContent = '';
+  }
+}
+
+// ----- FEEDBACK -----
+function showFeedback(type, text) {
+  const msg = document.getElementById('feedback-message');
+  msg.className = type;
+  msg.textContent = text;
+  setTimeout(() => { msg.className = ''; msg.textContent = ''; }, 1200);
+}
+
+// ----- TIMER -----
+function startTimer(seconds) {
+  gameState.timeLeft = seconds;
+  const fill = document.getElementById('timer-fill');
+  const total = seconds;
+  fill.style.width = '100%';
+
+  if (gameState.challengeTimer) clearInterval(gameState.challengeTimer);
+  gameState.challengeTimer = setInterval(() => {
+    gameState.timeLeft -= 0.1;
+    const pct = Math.max(0, (gameState.timeLeft / total) * 100);
+    fill.style.width = pct + '%';
+
+    if (pct <= 30) {
+      fill.style.background = 'linear-gradient(90deg, #e94560, #ff6b6b)';
+    } else {
+      fill.style.background = 'linear-gradient(90deg, #e94560, #ffd700)';
+    }
+
+    if (gameState.timeLeft <= 0) {
+      clearInterval(gameState.challengeTimer);
+      handleTimeout();
+    }
+  }, 100);
+}
+
+function handleTimeout() {
+  gameState.streak = 0;
+  gameState.incorrect++;
+  showFeedback('incorrect', "Time's up!");
+  updateUI();
+
+  // Mark current dot as wrong
+  const dots = document.querySelectorAll('.progress-dot');
+  if (dots[gameState.challengeIndex]) dots[gameState.challengeIndex].classList.add('wrong');
+
+  setTimeout(nextChallenge, 1500);
+}
+
+// ----- CHALLENGE FLOW -----
+function generateChallenges() {
+  // Shuffle and pick totalChallenges
+  const shuffled = [...allChallenges].sort(() => Math.random() - 0.5);
+  gameState.challenges = shuffled.slice(0, gameState.totalChallenges);
+}
+
+function loadChallenge(index) {
+  if (index >= gameState.totalChallenges) {
+    endGame();
+    return;
+  }
+
+  const challenge = gameState.challenges[index];
+  gameState.currentChallenge = challenge;
+  gameState.textSelections = {};
+
+  // Run setup
+  if (challenge.setup) challenge.setup(gameState);
+
+  // Render
+  renderDesktop();
+  renderProgress();
+  applyVisual(challenge.visual);
+
+  // Show instruction
+  document.getElementById('challenge-instruction').innerHTML =
+    `<span style="color:#888;font-size:0.9rem">${challenge.category}</span><br>${challenge.instruction}`;
+  document.getElementById('challenge-counter').textContent =
+    `${index + 1} / ${gameState.totalChallenges}`;
+
+  // Show hint based on difficulty
+  showHint(challenge);
+
+  // Timer
+  const timeLimit = gameState.level === 'expert' ? 8 : gameState.level === 'intermediate' ? 15 : 30;
+  startTimer(timeLimit);
+}
+
+function nextChallenge() {
+  gameState.challengeIndex++;
+  if (gameState.hintTimer) clearInterval(gameState.hintTimer);
+  loadChallenge(gameState.challengeIndex);
+}
+
+function handleCorrect() {
+  if (gameState.challengeTimer) clearInterval(gameState.challengeTimer);
+  if (gameState.hintTimer) clearInterval(gameState.hintTimer);
+
+  gameState.correct++;
+  gameState.streak++;
+  if (gameState.streak > gameState.bestStreak) gameState.bestStreak = gameState.streak;
+
+  // Score: base + time bonus + streak bonus
+  const timeBonus = Math.floor(gameState.timeLeft * 10);
+  const streakBonus = (gameState.streak - 1) * 25;
+  const levelMultiplier = gameState.level === 'expert' ? 3 : gameState.level === 'intermediate' ? 2 : 1;
+  const points = (100 + timeBonus + streakBonus) * levelMultiplier;
+  gameState.score += points;
+
+  if (gameState.streak >= 5 && gameState.streak % 5 === 0) {
+    showFeedback('streak', `${gameState.streak}x STREAK! +${points}`);
+  } else {
+    showFeedback('correct', `Correct! +${points}`);
+  }
+
+  updateUI();
+  setTimeout(nextChallenge, 1200);
+}
+
+function handleIncorrect(e) {
+  gameState.streak = 0;
+  gameState.incorrect++;
+  const challenge = gameState.currentChallenge;
+
+  // Show what they should have pressed
+  const expected = challenge.keys.join(' + ');
+  showFeedback('incorrect', `Wrong! Need: ${expected}`);
+  updateUI();
+}
+
+// ----- UI UPDATES -----
+function updateUI() {
+  document.getElementById('score').textContent = gameState.score;
+  document.getElementById('streak').textContent = gameState.streak;
+}
+
+// ----- GAME LIFECYCLE -----
+function startGame(level) {
+  gameState = {
+    level: level,
+    score: 0,
+    streak: 0,
+    bestStreak: 0,
+    currentChallenge: null,
+    challengeIndex: 0,
+    totalChallenges: 20,
+    correct: 0,
+    incorrect: 0,
+    hintTimer: null,
+    challengeTimer: null,
+    timeLeft: 0,
+    clipboard: '',
+    activeWindowId: 'win-browser',
+    activeTabIndex: 0,
+    textSelections: {},
+    playing: true,
+    challenges: [],
+  };
+
+  document.getElementById('level-indicator').textContent = level.toUpperCase();
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('game-container').classList.add('active');
+  document.getElementById('result-screen').classList.remove('active');
+
+  generateChallenges();
+  renderProgress();
+  updateUI();
+  loadChallenge(0);
+}
+
+function endGame() {
+  gameState.playing = false;
+  if (gameState.challengeTimer) clearInterval(gameState.challengeTimer);
+  if (gameState.hintTimer) clearInterval(gameState.hintTimer);
+  clearVisuals();
+
+  const total = gameState.correct + gameState.incorrect;
+  const accuracy = total > 0 ? Math.round((gameState.correct / total) * 100) : 0;
+
+  document.getElementById('final-score').textContent = gameState.score;
+  document.getElementById('final-correct').textContent = gameState.correct;
+  document.getElementById('final-total').textContent = total;
+  document.getElementById('final-streak').textContent = gameState.bestStreak;
+  document.getElementById('final-accuracy').textContent = accuracy + '%';
+
+  if (accuracy >= 90) {
+    document.getElementById('result-title').textContent = 'Keyboard Master!';
+  } else if (accuracy >= 70) {
+    document.getElementById('result-title').textContent = 'Great Job!';
+  } else if (accuracy >= 50) {
+    document.getElementById('result-title').textContent = 'Keep Practicing!';
+  } else {
+    document.getElementById('result-title').textContent = 'Room to Grow!';
+  }
+
+  document.getElementById('result-screen').classList.add('active');
+}
+
+function returnToMenu() {
+  gameState.playing = false;
+  if (gameState.challengeTimer) clearInterval(gameState.challengeTimer);
+  if (gameState.hintTimer) clearInterval(gameState.hintTimer);
+
+  document.getElementById('game-container').classList.remove('active');
+  document.getElementById('result-screen').classList.remove('active');
+  document.getElementById('start-screen').classList.remove('hidden');
+}
+
+// ----- KEYBOARD HANDLER -----
+document.addEventListener('keydown', (e) => {
+  if (!gameState.playing || !gameState.currentChallenge) return;
+
+  // ESC to return to menu
+  if (e.key === 'Escape') {
+    returnToMenu();
+    return;
+  }
+
+  // Prevent default for shortcut keys so browser doesn't act on them
+  if (e.ctrlKey || e.altKey || e.metaKey || e.key === 'Tab' || e.key === 'F5' || e.key === 'F12' || e.key === 'PrintScreen') {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  // Ignore lone modifier keys
+  if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return;
+
+  const challenge = gameState.currentChallenge;
+
+  // Check if correct
+  if (challenge.verify(e)) {
+    handleCorrect();
+  } else if (challenge.altVerify && challenge.altVerify(e)) {
+    handleCorrect();
+  } else {
+    handleIncorrect(e);
+  }
+});
+
+// Prevent tab from leaving the page
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+  }
+});
+
+// ----- INITIAL RENDER -----
+renderDesktop();
+</script>
+</body>
+</html>
