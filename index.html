@@ -332,15 +332,15 @@
   <h1>Quick<span>Keys</span></h1>
   <p class="subtitle">Master Your Keyboard Shortcuts</p>
   <div class="level-select">
-    <button class="level-btn" onclick="startGame('beginner')">
+    <button class="level-btn" id="btn-beginner">
       <span class="level-name">Beginner</span>
       <span class="level-desc">Hints shown immediately. Learn the shortcuts!</span>
     </button>
-    <button class="level-btn" onclick="startGame('intermediate')">
+    <button class="level-btn" id="btn-intermediate">
       <span class="level-name">Intermediate</span>
       <span class="level-desc">Hints delayed 5 seconds. Test your memory!</span>
     </button>
-    <button class="level-btn" onclick="startGame('expert')">
+    <button class="level-btn" id="btn-expert">
       <span class="level-name">Expert</span>
       <span class="level-desc">No hints + time pressure. Prove mastery!</span>
     </button>
@@ -357,7 +357,7 @@
     <div id="level-indicator">BEGINNER</div>
     <div style="text-align:right">
       <div id="challenge-counter">1 / 20</div>
-      <div style="font-size:0.8rem;color:#888;cursor:pointer" onclick="returnToMenu()">ESC = Menu</div>
+      <div style="font-size:0.8rem;color:#888;cursor:pointer" id="btn-menu">ESC = Menu</div>
     </div>
   </div>
   <div id="timer-bar"><div id="timer-fill"></div></div>
@@ -384,7 +384,7 @@
 </div>
 
 <!-- ===== SNIP OVERLAY ===== -->
-<div id="snip-overlay" id="snip-overlay">
+<div id="snip-overlay">
   <div id="snip-selection"></div>
 </div>
 
@@ -395,7 +395,7 @@
   <div class="stat">Correct: <span id="final-correct">0</span> / <span id="final-total">20</span></div>
   <div class="stat">Best Streak: <span id="final-streak">0</span></div>
   <div class="stat">Accuracy: <span id="final-accuracy">0%</span></div>
-  <button onclick="returnToMenu()">Play Again</button>
+  <button id="btn-play-again">Play Again</button>
 </div>
 
 <script>
@@ -1225,6 +1225,13 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
   }
 });
+
+// ----- EVENT LISTENER WIRING -----
+document.getElementById('btn-beginner').addEventListener('click', () => startGame('beginner'));
+document.getElementById('btn-intermediate').addEventListener('click', () => startGame('intermediate'));
+document.getElementById('btn-expert').addEventListener('click', () => startGame('expert'));
+document.getElementById('btn-menu').addEventListener('click', () => returnToMenu());
+document.getElementById('btn-play-again').addEventListener('click', () => returnToMenu());
 
 // ----- INITIAL RENDER -----
 renderDesktop();
