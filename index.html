@@ -6,131 +6,194 @@
 <title>QuickKeys - Keyboard Shortcuts Training Game</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#1a1a2e;color:#e0e0e0;overflow:hidden;height:100vh;user-select:none}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#1a1a2e;color:#e0e0e0;overflow-x:hidden;min-height:100vh;user-select:none}
 
-/* START SCREEN */
-#start-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .5s}
+/* ===== START SCREEN ===== */
+#start-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .5s;overflow-y:auto;padding:20px}
 #start-screen.hidden{opacity:0;pointer-events:none}
-#start-screen h1{font-size:3.5rem;color:#e94560;text-shadow:0 0 30px rgba(233,69,96,.5);margin-bottom:.3rem}
+#start-screen h1{font-size:3.2rem;color:#e94560;text-shadow:0 0 30px rgba(233,69,96,.5);margin-bottom:.2rem}
 #start-screen h1 span{color:#fff}
-.subtitle{font-size:1.2rem;color:#aaa;margin-bottom:.5rem}
-.how-to-play{background:rgba(255,255,255,.05);border:1px solid #333;border-radius:10px;padding:16px 24px;margin-bottom:1.5rem;max-width:520px;text-align:center}
-.how-to-play h3{color:#e94560;margin-bottom:6px;font-size:1rem}
-.how-to-play p{color:#aaa;font-size:.9rem;line-height:1.5}
-.level-select{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
-.level-btn{padding:1rem 2rem;border:2px solid #e94560;background:transparent;color:#fff;font-size:1.1rem;border-radius:12px;cursor:pointer;transition:all .3s;min-width:200px}
-.level-btn:hover{background:#e94560;transform:translateY(-3px);box-shadow:0 8px 25px rgba(233,69,96,.3)}
-.level-btn .level-name{font-weight:bold;display:block;margin-bottom:.3rem}
-.level-btn .level-desc{font-size:.8rem;color:#ccc}
-.level-btn:hover .level-desc{color:#fff}
+.subtitle{font-size:1.1rem;color:#aaa;margin-bottom:.8rem}
+.how-to-play{background:rgba(255,255,255,.05);border:1px solid #333;border-radius:10px;padding:14px 20px;margin-bottom:1.2rem;max-width:560px;text-align:center}
+.how-to-play h3{color:#e94560;margin-bottom:4px;font-size:.95rem}
+.how-to-play p{color:#aaa;font-size:.85rem;line-height:1.5}
+.level-select{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;max-width:700px}
+.level-btn{padding:.8rem 1.5rem;border:3px solid;background:transparent;color:#fff;font-size:1rem;border-radius:12px;cursor:pointer;transition:all .3s;min-width:200px;flex:1}
+.level-btn .level-name{font-weight:bold;display:block;margin-bottom:.3rem;font-size:1.1rem}
+.level-btn .level-desc{font-size:.75rem;color:#ccc;display:block;line-height:1.3}
+.level-btn:hover{transform:translateY(-3px)}
 
-/* GAME */
-#game-container{display:none;height:100vh;flex-direction:column}
-#game-container.active{display:flex}
-#top-bar{background:#16213e;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #0f3460;flex-shrink:0}
+.btn-green{border-color:#4caf50}
+.btn-green:hover{background:#4caf50;box-shadow:0 8px 25px rgba(76,175,80,.3)}
+.btn-green .level-name{color:#4caf50}
+.btn-green:hover .level-name{color:#fff}
+
+.btn-yellow{border-color:#ffc107}
+.btn-yellow:hover{background:#ffc107;color:#000;box-shadow:0 8px 25px rgba(255,193,7,.3)}
+.btn-yellow .level-name{color:#ffc107}
+.btn-yellow:hover .level-name{color:#000}
+
+.btn-red{border-color:#e94560}
+.btn-red:hover{background:#e94560;box-shadow:0 8px 25px rgba(233,69,96,.3)}
+.btn-red .level-name{color:#e94560}
+.btn-red:hover .level-name{color:#fff}
+
+/* ===== GAME SCREEN (Levels 1 & 2) ===== */
+#game-screen{display:none;height:100vh;flex-direction:column}
+#game-screen.active{display:flex}
+#top-bar{background:#16213e;padding:5px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #0f3460;flex-shrink:0}
 #score-display{font-size:1rem}
 #score-display span{color:#e94560;font-weight:bold}
 #streak-display{font-size:.85rem;color:#aaa}
 #streak-display span{color:#ffd700;font-weight:bold}
+#level-indicator{font-size:.9rem;font-weight:bold;padding:3px 12px;border-radius:12px}
+.lv-green{background:#4caf50;color:#fff}
+.lv-yellow{background:#ffc107;color:#000}
 #timer-bar{height:4px;background:#333;border-radius:2px;overflow:hidden;flex-shrink:0}
-#timer-fill{height:100%;background:linear-gradient(90deg,#e94560,#ffd700);transition:width .1s linear;width:100%}
+#timer-fill{height:100%;background:linear-gradient(90deg,#4caf50,#ffd700);transition:width .1s linear;width:100%}
 #progress-bar{display:flex;gap:4px;justify-content:center;padding:3px 0;flex-shrink:0;background:#16213e}
-.progress-dot{width:8px;height:8px;border-radius:50%;background:#333;transition:background .3s}
+.progress-dot{width:10px;height:10px;border-radius:50%;background:#333;transition:background .3s}
 .progress-dot.done{background:#4caf50}
-.progress-dot.current{background:#e94560}
+.progress-dot.current{background:#e94560;box-shadow:0 0 6px #e94560}
 .progress-dot.wrong{background:#ff6b6b}
 
-/* CHALLENGE */
-#challenge-area{background:linear-gradient(180deg,#16213e,#1a1a2e);padding:10px 24px;text-align:center;flex-shrink:0;min-height:95px;display:flex;flex-direction:column;align-items:center;justify-content:center}
-#challenge-instruction{font-size:1.35rem;font-weight:bold;color:#fff;margin-bottom:6px}
-#shortcut-hint{font-size:1.1rem;color:#e94560;padding:4px 16px;background:rgba(233,69,96,.1);border:1px solid rgba(233,69,96,.3);border-radius:8px;display:inline-block;transition:opacity .3s;min-height:34px}
+#challenge-area{background:linear-gradient(180deg,#16213e,#1a1a2e);padding:12px 24px;text-align:center;flex-shrink:0;min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#challenge-instruction{font-size:1.4rem;font-weight:bold;color:#fff;margin-bottom:6px}
+#shortcut-hint{font-size:1.1rem;color:#e94560;padding:4px 16px;background:rgba(233,69,96,.1);border:1px solid rgba(233,69,96,.3);border-radius:8px;display:inline-block;transition:opacity .5s;min-height:36px}
 #shortcut-hint.delayed{opacity:0}
 #shortcut-hint.revealed{opacity:1}
+.key-hint{display:inline-block;background:#2d3436;border:1px solid #555;border-bottom:3px solid #444;border-radius:5px;padding:2px 10px;font-family:Consolas,monospace;font-size:1rem;color:#fff;margin:0 2px;min-width:28px;text-align:center}
 #hint-countdown{font-size:.85rem;color:#888;margin-top:3px;min-height:18px}
-.key-hint{display:inline-block;background:#2d3436;border:1px solid #555;border-bottom:3px solid #444;border-radius:5px;padding:2px 10px;font-family:Consolas,'Courier New',monospace;font-size:1rem;color:#fff;margin:0 2px;min-width:28px;text-align:center}
 
-/* DESKTOP */
 #desktop{flex:1;position:relative;background:#0d1b2a;overflow:hidden;padding:6px;min-height:0}
-.sim-window{position:absolute;border-radius:6px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:box-shadow .3s;display:flex;flex-direction:column}
-.sim-window.active-window{box-shadow:0 6px 30px rgba(233,69,96,.3);z-index:10}
+.sim-window{position:absolute;border-radius:6px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.5);display:flex;flex-direction:column}
+.sim-window.active-window{box-shadow:0 6px 30px rgba(76,175,80,.3);z-index:10}
 .sim-window .title-bar{height:24px;padding:0 8px;display:flex;align-items:center;justify-content:space-between;background:#2d3436;flex-shrink:0}
 .sim-window.active-window .title-bar{background:#0f3460}
 .sim-window .title{font-size:.65rem;color:#ccc}
 .sim-window.active-window .title{color:#fff}
-.sim-window .window-controls{display:flex;gap:4px}
-.sim-window .window-controls span{width:9px;height:9px;border-radius:50%;display:inline-block}
+.window-controls{display:flex;gap:4px}
+.window-controls span{width:9px;height:9px;border-radius:50%;display:inline-block}
 .ctrl-close{background:#e94560}.ctrl-min{background:#ffd700}.ctrl-max{background:#4caf50}
-.sim-window .window-body{flex:1;padding:6px;background:#1e272e;font-size:.7rem;color:#bbb;overflow:auto;white-space:pre-wrap}
+.window-body{flex:1;padding:6px;background:#1e272e;font-size:.7rem;color:#bbb;overflow:auto;white-space:pre-wrap}
 .tab-bar{display:flex;background:#2d3436;flex-shrink:0}
 .tab{padding:3px 10px;font-size:.6rem;color:#999;background:#2d3436;border-right:1px solid #444}
 .tab.active-tab{background:#1e272e;color:#fff}
 .text-selected{background:#3390ff!important;color:#fff!important}
-@keyframes flash-tab{0%,100%{background:#2d3436}50%{background:#e94560;color:#fff}}
-.tab.flashing{animation:flash-tab .8s infinite}
-@keyframes flash-window{0%,100%{box-shadow:0 4px 20px rgba(0,0,0,.5)}50%{box-shadow:0 6px 35px rgba(233,69,96,.6)}}
-.sim-window.flashing{animation:flash-window .8s infinite}
-#taskbar{height:30px;background:#16213e;border-top:2px solid #0f3460;display:flex;align-items:center;padding:0 8px;gap:4px;flex-shrink:0}
-.taskbar-item{padding:3px 8px;background:#2d3436;border-radius:3px;font-size:.6rem;color:#bbb;border:1px solid transparent}
-.taskbar-item.tb-active{background:#0f3460;color:#fff;border-color:#e94560}
-.taskbar-item.tb-flashing{animation:flash-tab .8s infinite}
-#clipboard-indicator{position:absolute;bottom:6px;right:6px;background:#16213e;border:1px solid #333;border-radius:6px;padding:3px 8px;font-size:.65rem;color:#aaa;z-index:50}
-#clipboard-indicator strong{color:#e94560}
+@keyframes flash-el{0%,100%{opacity:1}50%{opacity:.3}}
+.flashing{animation:flash-el .6s infinite}
+#taskbar{height:28px;background:#16213e;border-top:2px solid #0f3460;display:flex;align-items:center;padding:0 8px;gap:4px;flex-shrink:0}
+.taskbar-item{padding:2px 8px;background:#2d3436;border-radius:3px;font-size:.6rem;color:#bbb;border:1px solid transparent}
+.taskbar-item.tb-active{background:#0f3460;color:#fff;border-color:#4caf50}
 
-/* VIRTUAL KEYBOARD */
+/* ===== VIRTUAL KEYBOARD ===== */
 #keyboard-area{background:#111;border-top:2px solid #333;padding:6px 4px 8px;flex-shrink:0}
-#active-combo{text-align:center;margin-bottom:5px;min-height:24px;font-size:.85rem;color:#aaa}
+#active-combo{text-align:center;margin-bottom:4px;min-height:22px;font-size:.85rem;color:#aaa}
 .combo-key{display:inline-block;background:#e94560;color:#fff;padding:1px 8px;border-radius:4px;margin:0 2px;font-family:Consolas,monospace;font-size:.8rem}
 .combo-plus{color:#666;margin:0 2px}
 .kb-row{display:flex;justify-content:center;gap:2px;margin-bottom:2px}
-.kb-key{display:flex;align-items:center;justify-content:center;background:#2a2a3a;color:#ccc;border:1px solid #444;border-bottom:3px solid #333;border-radius:4px;font-family:Consolas,'Courier New',monospace;font-size:.65rem;cursor:pointer;transition:all .15s;height:30px;min-width:30px;padding:0 5px}
+.kb-key{display:flex;align-items:center;justify-content:center;background:#2a2a3a;color:#ccc;border:1px solid #444;border-bottom:3px solid #333;border-radius:4px;font-family:Consolas,monospace;font-size:.65rem;cursor:pointer;transition:all .15s;height:30px;min-width:30px;padding:0 5px}
 .kb-key:hover{background:#3a3a5a;border-color:#666;color:#fff}
 .kb-key:active{transform:translateY(2px);border-bottom-width:1px}
 .kb-key.modifier{background:#1a3a5a;border-color:#2a5a8a;color:#7ab8f5}
 .kb-key.modifier:hover{background:#2a4a6a}
 .kb-key.modifier.active{background:#e94560;border-color:#ff6b8a;color:#fff;box-shadow:0 0 12px rgba(233,69,96,.5)}
-.kb-key.w1{min-width:44px}.kb-key.w2{min-width:60px}.kb-key.w3{min-width:78px}.kb-key.w4{min-width:100px}.kb-key.spacebar{min-width:180px}
+.kb-key.w1{min-width:44px}.kb-key.w2{min-width:60px}.kb-key.w3{min-width:78px}.kb-key.spacebar{min-width:180px}
 .kb-key.correct-flash{background:#4caf50!important;border-color:#6fcf70!important;color:#fff!important}
 .kb-key.wrong-flash{background:#e94560!important;border-color:#ff6b8a!important;color:#fff!important}
 
-/* FEEDBACK */
+/* ===== FEEDBACK ===== */
 #feedback-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:100}
 #feedback-message{font-size:2.2rem;font-weight:bold;padding:14px 36px;border-radius:16px;opacity:0;transform:scale(.8);transition:all .3s}
 #feedback-message.correct{color:#4caf50;background:rgba(76,175,80,.15);border:2px solid rgba(76,175,80,.3);opacity:1;transform:scale(1)}
 #feedback-message.incorrect{color:#e94560;background:rgba(233,69,96,.15);border:2px solid rgba(233,69,96,.3);opacity:1;transform:scale(1)}
 #feedback-message.streak{color:#ffd700;background:rgba(255,215,0,.15);border:2px solid rgba(255,215,0,.3);opacity:1;transform:scale(1)}
 
-/* RESULTS */
+/* ===== RESULTS (L1/L2) ===== */
 #result-screen{position:fixed;inset:0;background:rgba(26,26,46,.95);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200}
 #result-screen.active{display:flex}
 #result-screen h2{font-size:2.5rem;color:#e94560;margin-bottom:1rem}
 .stat{font-size:1.2rem;color:#ccc;margin:.3rem 0}
 .stat span{color:#ffd700;font-weight:bold}
-#result-screen button{margin-top:2rem;padding:12px 40px;background:#e94560;border:none;color:#fff;font-size:1.1rem;border-radius:8px;cursor:pointer;transition:transform .2s}
-#result-screen button:hover{transform:translateY(-2px)}
+#result-screen button,#expert-screen button{margin-top:1rem;padding:10px 36px;background:#e94560;border:none;color:#fff;font-size:1rem;border-radius:8px;cursor:pointer;transition:transform .2s}
+#result-screen button:hover,#expert-screen button:hover{transform:translateY(-2px)}
+
+/* ===== LEVEL 3 EXPERT SCREEN ===== */
+#expert-screen{display:none;min-height:100vh;flex-direction:column;background:#1a1a2e}
+#expert-screen.active{display:flex}
+#expert-top{background:#16213e;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #e94560;flex-shrink:0}
+#expert-top h2{color:#e94560;font-size:1.3rem}
+#expert-menu-btn{background:transparent;border:1px solid #555;color:#aaa;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:.85rem}
+#expert-menu-btn:hover{border-color:#e94560;color:#fff}
+
+#expert-task-select{padding:16px 20px;flex-shrink:0}
+#expert-task-select h3{color:#aaa;font-size:.9rem;margin-bottom:8px}
+.task-chips{display:flex;flex-wrap:wrap;gap:6px}
+.task-chip{padding:6px 14px;background:#2a2a3a;border:2px solid #444;border-radius:20px;font-size:.8rem;color:#ccc;cursor:pointer;transition:all .2s;font-family:Consolas,monospace}
+.task-chip:hover{border-color:#e94560;color:#fff}
+.task-chip.active{background:#e94560;border-color:#e94560;color:#fff}
+.task-chip .chip-count{font-size:.65rem;color:#888;margin-left:4px}
+.task-chip.active .chip-count{color:rgba(255,255,255,.7)}
+
+#expert-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;gap:16px}
+#expert-task-name{font-size:1.1rem;color:#e94560;font-family:Consolas,monospace;background:rgba(233,69,96,.1);border:1px solid rgba(233,69,96,.3);padding:6px 20px;border-radius:8px}
+#expert-scenario{font-size:1.3rem;color:#fff;max-width:600px;line-height:1.5}
+#expert-detail{font-size:.9rem;color:#888;max-width:500px}
+
+#expert-timer-display{font-size:3.5rem;font-weight:bold;color:#ffd700;font-family:Consolas,monospace;letter-spacing:2px}
+#expert-timer-display.running{color:#4caf50}
+
+.expert-btn{padding:14px 50px;border:none;border-radius:12px;font-size:1.2rem;font-weight:bold;cursor:pointer;transition:all .2s}
+.expert-btn:hover{transform:translateY(-2px)}
+#btn-start-task{background:#4caf50;color:#fff}
+#btn-start-task:hover{box-shadow:0 6px 20px rgba(76,175,80,.4)}
+#btn-return-task{background:#e94560;color:#fff;display:none}
+#btn-return-task:hover{box-shadow:0 6px 20px rgba(233,69,96,.4)}
+
+#expert-attempt-info{font-size:.9rem;color:#aaa}
+#expert-attempt-info span{color:#ffd700;font-weight:bold}
+
+/* Times history */
+#expert-history{padding:12px 20px;flex-shrink:0;max-height:200px;overflow-y:auto}
+#expert-history h3{color:#aaa;font-size:.85rem;margin-bottom:6px}
+.history-grid{display:flex;flex-wrap:wrap;gap:6px}
+.history-item{background:#2a2a3a;border:1px solid #444;border-radius:6px;padding:4px 12px;font-size:.8rem;color:#ccc;font-family:Consolas,monospace;min-width:80px;text-align:center}
+.history-item.best{background:rgba(76,175,80,.2);border-color:#4caf50;color:#4caf50}
+.history-item .attempt-num{font-size:.6rem;color:#888;display:block}
+
+/* Bar chart */
+#expert-chart{height:100px;display:flex;align-items:flex-end;gap:4px;padding:0 20px;margin-top:8px}
+.chart-bar{flex:1;background:#e94560;border-radius:3px 3px 0 0;transition:height .3s;min-width:20px;max-width:50px;position:relative}
+.chart-bar.best-bar{background:#4caf50}
+.chart-bar-label{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:.55rem;color:#888;white-space:nowrap}
 </style>
 </head>
 <body>
 
+<!-- ===== START SCREEN ===== -->
 <div id="start-screen">
   <h1>Quick<span>Keys</span></h1>
   <p class="subtitle">Master Your Keyboard Shortcuts</p>
   <div class="how-to-play">
     <h3>How to Play</h3>
-    <p>Read the challenge, then <b>click</b> the correct key combo on the virtual keyboard below.<br>
-    Click modifier keys (Ctrl, Alt, Shift, Win) to toggle them <b>on</b>, then click the action key to submit!</p>
+    <p><b style="color:#4caf50">Level 1</b> &amp; <b style="color:#ffc107">Level 2</b>: Click the correct key combination on the virtual keyboard.<br>
+    Click modifier keys (Ctrl, Alt, Shift, Win) to toggle them on, then click the action key.<br><br>
+    <b style="color:#e94560">Level 3</b>: Real-world tasks! Perform the shortcut on your actual computer.<br>
+    Click Start, do the task, click Return. Repeat 10 times and watch your speed improve!</p>
   </div>
   <div class="level-select">
-    <button class="level-btn" id="btn-beginner"><span class="level-name">Beginner</span><span class="level-desc">Hints shown immediately</span></button>
-    <button class="level-btn" id="btn-intermediate"><span class="level-name">Intermediate</span><span class="level-desc">Hints delayed 5 seconds</span></button>
-    <button class="level-btn" id="btn-expert"><span class="level-name">Expert</span><span class="level-desc">No hints + time pressure</span></button>
+    <button class="level-btn btn-green" id="btn-l1"><span class="level-name">Level 1</span><span class="level-desc">Beginner - The Essentials<br>Copy, Paste, Undo, Save &amp; more</span></button>
+    <button class="level-btn btn-yellow" id="btn-l2"><span class="level-name">Level 2</span><span class="level-desc">Intermediate - Power User<br>Tabs, Desktop, Delete words &amp; more</span></button>
+    <button class="level-btn btn-red" id="btn-l3"><span class="level-name">Level 3</span><span class="level-desc">Expert - Real World<br>Do it on your actual PC!</span></button>
   </div>
 </div>
 
-<div id="game-container">
+<!-- ===== GAME SCREEN (L1 & L2) ===== -->
+<div id="game-screen">
   <div id="top-bar">
     <div><div id="score-display">Score: <span id="score">0</span></div><div id="streak-display">Streak: <span id="streak">0</span></div></div>
-    <div id="level-indicator">BEGINNER</div>
-    <div style="text-align:right"><div id="challenge-counter">1 / 20</div><div style="font-size:.75rem;color:#888;cursor:pointer" id="btn-menu">Menu</div></div>
+    <div id="level-indicator"></div>
+    <div style="text-align:right"><div id="challenge-counter">1 / 10</div><div style="font-size:.75rem;color:#888;cursor:pointer" id="btn-menu">Menu</div></div>
   </div>
   <div id="timer-bar"><div id="timer-fill"></div></div>
   <div id="progress-bar"></div>
@@ -139,7 +202,7 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#1a1a2e;
     <div id="shortcut-hint"></div>
     <div id="hint-countdown"></div>
   </div>
-  <div id="desktop"><div id="clipboard-indicator">Clipboard: <strong id="clipboard-content">(empty)</strong></div></div>
+  <div id="desktop"></div>
   <div id="taskbar"></div>
   <div id="keyboard-area">
     <div id="active-combo">Click modifier keys, then the action key</div>
@@ -147,18 +210,52 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#1a1a2e;
   </div>
 </div>
 
+<!-- ===== FEEDBACK ===== -->
 <div id="feedback-overlay"><div id="feedback-message"></div></div>
 
+<!-- ===== RESULTS (L1/L2) ===== -->
 <div id="result-screen">
   <h2 id="result-title">Round Complete!</h2>
   <div class="stat">Score: <span id="final-score">0</span></div>
-  <div class="stat">Correct: <span id="final-correct">0</span> / <span id="final-total">20</span></div>
+  <div class="stat">Correct: <span id="final-correct">0</span> / <span id="final-total">10</span></div>
   <div class="stat">Best Streak: <span id="final-streak">0</span></div>
   <div class="stat">Accuracy: <span id="final-accuracy">0%</span></div>
   <button id="btn-play-again">Play Again</button>
 </div>
 
+<!-- ===== LEVEL 3 EXPERT SCREEN ===== -->
+<div id="expert-screen">
+  <div id="expert-top">
+    <h2>Level 3: Expert - Real World Tasks</h2>
+    <button id="expert-menu-btn">Back to Menu</button>
+  </div>
+  <div id="expert-task-select">
+    <h3>Choose a shortcut to practice:</h3>
+    <div class="task-chips" id="task-chips"></div>
+  </div>
+  <div id="expert-main">
+    <div id="expert-task-name"></div>
+    <div id="expert-scenario"></div>
+    <div id="expert-detail"></div>
+    <div id="expert-timer-display">0.00s</div>
+    <div id="expert-attempt-info">Attempt <span id="expert-attempt">0</span> / 10</div>
+    <div>
+      <button class="expert-btn" id="btn-start-task">Start Task</button>
+      <button class="expert-btn" id="btn-return-task">Done - I'm Back!</button>
+    </div>
+  </div>
+  <div id="expert-history">
+    <h3>Your Times:</h3>
+    <div id="expert-chart"></div>
+    <div class="history-grid" id="history-grid"></div>
+  </div>
+</div>
+
 <script>
+// =====================================================================
+// QuickKeys - 3 Level Keyboard Shortcuts Game
+// =====================================================================
+
 // ===== KEYBOARD LAYOUT =====
 const KB = [
   [{l:'Esc',id:'Escape',w:'w1'},{l:'F1',id:'F1'},{l:'F2',id:'F2'},{l:'F3',id:'F3'},{l:'F4',id:'F4'},{l:'F5',id:'F5'},{l:'F6',id:'F6'},{l:'F7',id:'F7'},{l:'F8',id:'F8'},{l:'F9',id:'F9'},{l:'F10',id:'F10'},{l:'F11',id:'F11'},{l:'F12',id:'F12'},{l:'PrtSc',id:'PrintScreen',w:'w1'}],
@@ -168,92 +265,112 @@ const KB = [
   [{l:'Shift',id:'Shift',w:'w3',mod:true},{l:'Z',id:'Z'},{l:'X',id:'X'},{l:'C',id:'C'},{l:'V',id:'V'},{l:'B',id:'B'},{l:'N',id:'N'},{l:'M',id:'M'},{l:',',id:','},{l:'.',id:'.'},{l:'/',id:'/'},{l:'Shift',id:'ShiftR',w:'w3',mod:true,mid:'Shift'}],
   [{l:'Ctrl',id:'Ctrl',w:'w2',mod:true},{l:'Win',id:'Win',w:'w1',mod:true},{l:'Alt',id:'Alt',w:'w2',mod:true},{l:'',id:'Space',w:'spacebar'},{l:'Alt',id:'AltR',w:'w1',mod:true,mid:'Alt'},{l:'Home',id:'Home'},{l:'End',id:'End'},{l:'\u2190',id:'ArrowLeft'},{l:'\u2191',id:'ArrowUp'},{l:'\u2193',id:'ArrowDown'},{l:'\u2192',id:'ArrowRight'}]
 ];
-
 const MODS = new Set(['Ctrl','Alt','Shift','ShiftR','AltR','Win']);
+const KEY_DISPLAY = {'ArrowLeft':'\u2190','ArrowRight':'\u2192','ArrowUp':'\u2191','ArrowDown':'\u2193','Backspace':'Bksp','Escape':'Esc','=':'+','CapsLock':'Caps'};
+
+// ===== LEVEL 1 CHALLENGES (Green - Beginner) =====
+const L1_CHALLENGES = [
+  {inst:'COPY the selected text!',keys:['Ctrl','C'],desc:'Ctrl+C = Copy'},
+  {inst:'PASTE the text!',keys:['Ctrl','V'],desc:'Ctrl+V = Paste'},
+  {inst:'CUT the selected text!',keys:['Ctrl','X'],desc:'Ctrl+X = Cut'},
+  {inst:'UNDO your last action!',keys:['Ctrl','Z'],desc:'Ctrl+Z = Undo'},
+  {inst:'REDO what you just undid!',keys:['Ctrl','Y'],desc:'Ctrl+Y = Redo'},
+  {inst:'SELECT ALL the text!',keys:['Ctrl','A'],desc:'Ctrl+A = Select All'},
+  {inst:'Switch to the NEXT WINDOW!',keys:['Alt','Tab'],desc:'Alt+Tab = Switch Apps'},
+  {inst:'SAVE your work!',keys:['Ctrl','S'],desc:'Ctrl+S = Save'},
+  {inst:'PRINT the document!',keys:['Ctrl','P'],desc:'Ctrl+P = Print'},
+  {inst:'FIND text in the document!',keys:['Ctrl','F'],desc:'Ctrl+F = Find'},
+];
+
+// ===== LEVEL 2 CHALLENGES (Yellow - Intermediate) =====
+const L2_CHALLENGES = [
+  {inst:'REOPEN the tab you just closed!',keys:['Ctrl','Shift','T'],desc:'Ctrl+Shift+T = Reopen Tab'},
+  {inst:'CLOSE the current tab!',keys:['Ctrl','W'],desc:'Ctrl+W = Close Tab'},
+  {inst:'Open a NEW TAB!',keys:['Ctrl','T'],desc:'Ctrl+T = New Tab'},
+  {inst:'Switch to the NEXT TAB!',keys:['Ctrl','Tab'],desc:'Ctrl+Tab = Next Tab'},
+  {inst:'SHOW THE DESKTOP instantly!',keys:['Win','D'],desc:'Win+D = Show Desktop'},
+  {inst:'LOCK your computer!',keys:['Win','L'],desc:'Win+L = Lock Computer'},
+  {inst:'CLOSE this application!',keys:['Alt','F4'],desc:'Alt+F4 = Close App'},
+  {inst:'DELETE the whole previous word!',keys:['Ctrl','Backspace'],desc:'Ctrl+Bksp = Delete Word'},
+  {inst:'HIGHLIGHT text to the right!',keys:['Shift','ArrowRight'],desc:'Shift+Arrow = Highlight'},
+  {inst:'JUMP one word to the right!',keys:['Ctrl','ArrowRight'],desc:'Ctrl+Arrow = Jump Word'},
+];
+
+// ===== LEVEL 3 TASKS (Red - Expert) =====
+const L3_TASKS = [
+  {id:'winx',shortcut:'Win + X',name:'Quick Link Menu',
+   scenario:'Open the Quick Link / Power User menu using Win+X.',
+   detail:'This gives fast access to Device Manager, Disk Management, Terminal, and more. Press Win+X, see the menu appear, then come back.'},
+  {id:'winv',shortcut:'Win + V',name:'Clipboard History',
+   scenario:'Open your clipboard history using Win+V.',
+   detail:'This shows everything you\'ve copied recently. If it\'s your first time, you may need to enable it. Press Win+V, then come back.'},
+  {id:'winshifts',shortcut:'Win + Shift + S',name:'Snipping Tool Screenshot',
+   scenario:'Take a screenshot of any area on your screen using Win+Shift+S.',
+   detail:'The screen will dim and you can drag to select an area. Take the screenshot, then come back.'},
+  {id:'ctrlshiftesc',shortcut:'Ctrl + Shift + Esc',name:'Task Manager',
+   scenario:'Open Task Manager directly using Ctrl+Shift+Esc.',
+   detail:'This is faster than Ctrl+Alt+Delete. Open it, see the running processes, then come back.'},
+  {id:'winctrld',shortcut:'Win + Ctrl + D',name:'New Virtual Desktop',
+   scenario:'Create a new virtual desktop using Win+Ctrl+D.',
+   detail:'You\'ll switch to an empty desktop. To get back, use Win+Ctrl+Left Arrow. Create the desktop, then come back.'},
+  {id:'winctrlarrow',shortcut:'Win + Ctrl + Arrow',name:'Switch Virtual Desktop',
+   scenario:'Switch between virtual desktops using Win+Ctrl+Left or Right arrow.',
+   detail:'If you just created one, switch back and forth between them. Then come back.'},
+  {id:'ctrlshiftn',shortcut:'Ctrl + Shift + N',name:'Incognito / Private Window',
+   scenario:'Open a new private/incognito browser window using Ctrl+Shift+N.',
+   detail:'Make sure your browser is focused first. Open the private window, then come back.'},
+  {id:'altenter',shortcut:'Alt + Enter',name:'Properties / Fullscreen',
+   scenario:'Open file Properties using Alt+Enter in File Explorer.',
+   detail:'Select any file in File Explorer, then press Alt+Enter to see its properties. Close it and come back.'},
+  {id:'ctrlshiftclick',shortcut:'Ctrl + Shift + Click',name:'Open Link in New Tab & Switch',
+   scenario:'Open any link in a new tab AND switch to it using Ctrl+Shift+Click.',
+   detail:'In your browser, find any link. Hold Ctrl+Shift and click it. You\'ll open it in a new tab and jump to it. Then come back.'},
+  {id:'winr',shortcut:'Win + R',name:'Run Dialog',
+   scenario:'Open the Run dialog using Win+R.',
+   detail:'This lets you quickly launch programs. Press Win+R, type "notepad" and hit Enter to test it. Close notepad, then come back.'},
+];
 
 // ===== STATE =====
 let G = {
-  level:'beginner',score:0,streak:0,bestStreak:0,
-  cur:null,idx:0,total:20,correct:0,incorrect:0,
-  hintTimer:null,chalTimer:null,timeLeft:0,
-  clipboard:'',winId:'win-browser',tabIdx:0,textSel:{},
-  playing:false,challenges:[],
-  mods:new Set(),waiting:false
+  level:null, score:0, streak:0, bestStreak:0,
+  cur:null, idx:0, total:10, correct:0, incorrect:0,
+  hintTimer:null, chalTimer:null, timeLeft:0,
+  playing:false, challenges:[],
+  mods:new Set(), waiting:false
 };
+
+// Expert state
+let EX = {
+  taskIdx: 0,
+  attempt: 0,
+  timing: false,
+  startTime: 0,
+  timerInterval: null,
+  times: {} // taskId -> array of times
+};
+
+// Load saved times from localStorage
+try { const saved = localStorage.getItem('quickkeys_l3_times'); if(saved) EX.times = JSON.parse(saved); } catch(e){}
 
 // ===== WINDOWS =====
 const WINS = [
   {id:'win-browser',title:'Chrome',x:'2%',y:'2%',w:'54%',h:'52%',
    tabs:['Google','Wikipedia','YouTube','Gmail'],
-   bodies:['Search the web...\n\nTrending: Keyboard shortcuts','Wikipedia\n\nKeyboard shortcuts provide quick access to functions.','YouTube\n\n> "10 Shortcuts Everyone Should Know" - 2.4M views','Gmail - Inbox (3)\n\nFrom: Teacher - Great job!\nFrom: Study Group - Notes']},
-  {id:'win-document',title:'Word',x:'30%',y:'8%',w:'46%',h:'48%',body:'The quick brown fox jumps over the lazy dog.\n\nThis is a sample document for practicing shortcuts.\n\nLearning shortcuts saves hours every week!'},
-  {id:'win-notepad',title:'Notepad',x:'6%',y:'28%',w:'40%',h:'40%',body:'Notes:\n- Practice Ctrl+C and Ctrl+V\n- Alt+Tab switches windows\n- Ctrl+Tab switches browser tabs'},
-  {id:'win-explorer',title:'File Explorer',x:'44%',y:'24%',w:'42%',h:'42%',body:'Documents/\n  homework.docx\n  notes.txt\nPictures/\n  screenshot.png\nDownloads/\n  guide.pdf'}
+   bodies:['Search the web...\nTrending: Keyboard shortcuts','Wikipedia\nKeyboard shortcuts provide quick access.','YouTube\n"10 Shortcuts Everyone Should Know"','Gmail - Inbox (3)\nFrom: Teacher - Great job!']},
+  {id:'win-document',title:'Word',x:'30%',y:'8%',w:'46%',h:'48%',body:'The quick brown fox jumps over the lazy dog.\n\nPractice your shortcuts here!\n\nLearning shortcuts saves hours every week.'},
+  {id:'win-notepad',title:'Notepad',x:'6%',y:'28%',w:'40%',h:'40%',body:'Notes:\n- Ctrl+C = Copy\n- Ctrl+V = Paste\n- Alt+Tab = Switch windows'},
+  {id:'win-explorer',title:'File Explorer',x:'44%',y:'24%',w:'42%',h:'42%',body:'Documents/\n  homework.docx\n  notes.txt\nPictures/\n  screenshot.png'}
 ];
-
-// ===== CHALLENGES =====
-const ALL_CHALLENGES = [
-  {cat:'Tab Navigation',inst:'Switch to the NEXT TAB in the browser!',keys:['Ctrl','Tab'],setup:s=>{s.winId='win-browser';s.tabIdx=0},vis:'flash-next-tab'},
-  {cat:'Tab Navigation',inst:'Switch to the PREVIOUS TAB!',keys:['Ctrl','Shift','Tab'],setup:s=>{s.winId='win-browser';s.tabIdx=2},vis:'flash-prev-tab'},
-  {cat:'Tab Navigation',inst:'Jump to the 3rd browser tab!',keys:['Ctrl','3'],setup:s=>{s.winId='win-browser';s.tabIdx=0},vis:'flash-tab-3'},
-  {cat:'Tab Navigation',inst:'Open a NEW TAB!',keys:['Ctrl','T'],setup:s=>{s.winId='win-browser'}},
-  {cat:'Tab Navigation',inst:'CLOSE the current tab!',keys:['Ctrl','W'],setup:s=>{s.winId='win-browser';s.tabIdx=1},vis:'flash-current-tab'},
-
-  {cat:'Window Switching',inst:'Switch to the NEXT WINDOW!',keys:['Alt','Tab'],setup:s=>{s.winId='win-browser'},vis:'flash-window-document'},
-  {cat:'Window Switching',inst:'Notepad is flashing! Switch to it!',keys:['Alt','Tab'],setup:s=>{s.winId='win-document'},vis:'flash-window-notepad'},
-  {cat:'Window Switching',inst:'CLOSE this window completely!',keys:['Alt','F4'],setup:s=>{s.winId='win-notepad'},vis:'flash-window-notepad'},
-
-  {cat:'Copy & Paste',inst:'COPY the selected text!',keys:['Ctrl','C'],setup:s=>{s.winId='win-document';s.textSel={'win-document':'quick brown fox'}},vis:'select-text'},
-  {cat:'Copy & Paste',inst:'PASTE text into Notepad!',keys:['Ctrl','V'],setup:s=>{s.winId='win-notepad';s.clipboard='quick brown fox'}},
-  {cat:'Copy & Paste',inst:'CUT the selected text!',keys:['Ctrl','X'],setup:s=>{s.winId='win-document';s.textSel={'win-document':'lazy dog'}},vis:'select-text'},
-
-  {cat:'Editing',inst:'SELECT ALL text in the document!',keys:['Ctrl','A'],setup:s=>{s.winId='win-document'}},
-  {cat:'Editing',inst:'UNDO your last action!',keys:['Ctrl','Z'],setup:s=>{s.winId='win-document'}},
-  {cat:'Editing',inst:'REDO what you just undid!',keys:['Ctrl','Y'],setup:s=>{s.winId='win-document'}},
-
-  {cat:'File Operations',inst:'SAVE the document!',keys:['Ctrl','S'],setup:s=>{s.winId='win-document'}},
-  {cat:'File Operations',inst:'FIND text in the document!',keys:['Ctrl','F'],setup:s=>{s.winId='win-document'}},
-  {cat:'File Operations',inst:'PRINT the document!',keys:['Ctrl','P'],setup:s=>{s.winId='win-document'}},
-
-  {cat:'Special Actions',inst:'Insert a LINE BREAK without sending (chat/email)!',keys:['Shift','Enter'],setup:s=>{s.winId='win-browser';s.tabIdx=3}},
-
-  {cat:'Screenshots',inst:'Take a SCREENSHOT of the whole screen!',keys:['PrintScreen'],setup:s=>{}},
-  {cat:'Screenshots',inst:'Open the SNIPPING TOOL!',keys:['Win','Shift','S'],setup:s=>{}},
-
-  {cat:'Browser',inst:'Go BACK to the previous page!',keys:['Alt','ArrowLeft'],setup:s=>{s.winId='win-browser';s.tabIdx=0}},
-  {cat:'Browser',inst:'REFRESH the current page!',keys:['Ctrl','R'],setup:s=>{s.winId='win-browser'}},
-  {cat:'Browser',inst:'Jump to the ADDRESS BAR!',keys:['Ctrl','L'],setup:s=>{s.winId='win-browser'}},
-
-  {cat:'Window Management',inst:'SNAP window to the LEFT half!',keys:['Win','ArrowLeft'],setup:s=>{s.winId='win-document'}},
-  {cat:'Window Management',inst:'SNAP window to the RIGHT half!',keys:['Win','ArrowRight'],setup:s=>{s.winId='win-document'}},
-
-  {cat:'Text Selection',inst:'Select the next WORD to the right!',keys:['Ctrl','Shift','ArrowRight'],setup:s=>{s.winId='win-document'}},
-  {cat:'Text Selection',inst:'Select to the END of the line!',keys:['Shift','End'],setup:s=>{s.winId='win-document'}},
-  {cat:'Text Selection',inst:'Jump to the BEGINNING of the document!',keys:['Ctrl','Home'],setup:s=>{s.winId='win-document'}},
-
-  {cat:'View',inst:'ZOOM IN!',keys:['Ctrl','='],dkeys:['Ctrl','+'],setup:s=>{s.winId='win-browser'}},
-  {cat:'View',inst:'Reset zoom to DEFAULT!',keys:['Ctrl','0'],setup:s=>{s.winId='win-browser'}},
-];
-
-// Display name mapping for keys
-const KEY_DISPLAY = {
-  'ArrowLeft':'\u2190','ArrowRight':'\u2192','ArrowUp':'\u2191','ArrowDown':'\u2193',
-  'PrintScreen':'PrtSc','Backspace':'Bksp','Escape':'Esc','=':'+','CapsLock':'Caps'
-};
 
 // ===== BUILD KEYBOARD =====
 function buildKeyboard(){
-  const el=document.getElementById('virtual-keyboard');
-  el.innerHTML='';
+  const el=document.getElementById('virtual-keyboard'); el.innerHTML='';
   KB.forEach(row=>{
-    const r=document.createElement('div');r.className='kb-row';
+    const r=document.createElement('div'); r.className='kb-row';
     row.forEach(k=>{
-      const b=document.createElement('div');
-      b.className='kb-key';
-      if(k.w)b.classList.add(k.w);
-      if(k.mod)b.classList.add('modifier');
-      b.textContent=k.l;
-      b.dataset.kid=k.id;
+      const b=document.createElement('div'); b.className='kb-key';
+      if(k.w)b.classList.add(k.w); if(k.mod)b.classList.add('modifier');
+      b.textContent=k.l; b.dataset.kid=k.id;
       if(k.mid)b.dataset.mid=k.mid;
       b.addEventListener('click',()=>onKey(k));
       r.appendChild(b);
@@ -265,22 +382,18 @@ function buildKeyboard(){
 // ===== KEY CLICK =====
 function onKey(k){
   if(!G.playing||!G.cur||G.waiting)return;
-  const id=k.id, eid=k.mid||id;
-  if(k.mod||MODS.has(id)){
+  const eid=k.mid||k.id;
+  if(k.mod||MODS.has(k.id)){
     if(G.mods.has(eid))G.mods.delete(eid);else G.mods.add(eid);
     updModVis();updCombo();
-  } else {
-    checkAnswer(eid);
-  }
+  } else { checkAnswer(eid); }
 }
-
 function updModVis(){
   document.querySelectorAll('.kb-key.modifier').forEach(el=>{
     const id=el.dataset.mid||el.dataset.kid;
     el.classList.toggle('active',G.mods.has(id));
   });
 }
-
 function updCombo(){
   const d=document.getElementById('active-combo');
   if(!G.mods.size){d.innerHTML='Click modifier keys, then the action key';return;}
@@ -292,9 +405,9 @@ function updCombo(){
 
 // ===== CHECK ANSWER =====
 function checkAnswer(actionId){
-  const ch=G.cur, expected=ch.keys;
+  const expected=G.cur.keys;
   const modNames=new Set(['Ctrl','Alt','Shift','Win']);
-  const expMods=new Set(), expActions=[];
+  const expMods=new Set(),expActions=[];
   expected.forEach(k=>{if(modNames.has(k))expMods.add(k);else expActions.push(k);});
   const expAction=expActions[0]||expected[expected.length-1];
   const modsOk=G.mods.size===expMods.size&&[...expMods].every(m=>G.mods.has(m));
@@ -303,7 +416,6 @@ function checkAnswer(actionId){
   else{flashKB([...G.mods,actionId],'wrong-flash');handleWrong();}
   G.mods.clear();updModVis();updCombo();
 }
-
 function flashKB(ids,cls){
   const s=new Set(ids.map(k=>k.toUpperCase()));
   document.querySelectorAll('.kb-key').forEach(el=>{
@@ -314,34 +426,34 @@ function flashKB(ids,cls){
 
 // ===== RENDER DESKTOP =====
 function renderDesktop(){
-  const dk=document.getElementById('desktop');
-  dk.querySelectorAll('.sim-window').forEach(w=>w.remove());
+  const dk=document.getElementById('desktop');dk.innerHTML='';
   const tb=document.getElementById('taskbar');tb.innerHTML='';
+  const activeWin = G.cur && G.cur.winId ? G.cur.winId : 'win-browser';
+  const activeTab = G.cur && G.cur.tabIdx !== undefined ? G.cur.tabIdx : 0;
   WINS.forEach(win=>{
     const el=document.createElement('div');
-    el.className='sim-window'+(win.id===G.winId?' active-window':'');
+    el.className='sim-window'+(win.id===activeWin?' active-window':'');
     el.id=win.id;
-    el.style.cssText='left:'+win.x+';top:'+win.y+';width:'+win.w+';height:'+win.h+';';
+    el.style.cssText='left:'+win.x+';top:'+win.y+';width:'+win.w+';height:'+win.h;
     const bar=document.createElement('div');bar.className='title-bar';
     bar.innerHTML='<span class="title">'+win.title+'</span><span class="window-controls"><span class="ctrl-min"></span><span class="ctrl-max"></span><span class="ctrl-close"></span></span>';
     el.appendChild(bar);
     if(win.tabs){
       const tb2=document.createElement('div');tb2.className='tab-bar';
-      win.tabs.forEach((n,i)=>{const t=document.createElement('div');t.className='tab'+(i===G.tabIdx&&win.id===G.winId?' active-tab':'');t.textContent=n;tb2.appendChild(t);});
+      win.tabs.forEach((n,i)=>{const t=document.createElement('div');t.className='tab'+(i===activeTab&&win.id===activeWin?' active-tab':'');t.textContent=n;tb2.appendChild(t);});
       el.appendChild(tb2);
     }
     const body=document.createElement('div');body.className='window-body';
-    body.textContent=win.tabs?win.bodies[win.id===G.winId?G.tabIdx:0]:win.body;
-    if(G.textSel[win.id]){
-      const sel=G.textSel[win.id],full=body.textContent,idx=full.indexOf(sel);
-      if(idx>=0)body.innerHTML=esc(full.substring(0,idx))+'<span class="text-selected">'+esc(sel)+'</span>'+esc(full.substring(idx+sel.length));
+    body.textContent=win.tabs?win.bodies[win.id===activeWin?activeTab:0]:win.body;
+    if(G.cur&&G.cur.sel&&G.cur.sel[win.id]){
+      const sel=G.cur.sel[win.id],full=body.textContent,si=full.indexOf(sel);
+      if(si>=0)body.innerHTML=esc(full.substring(0,si))+'<span class="text-selected">'+esc(sel)+'</span>'+esc(full.substring(si+sel.length));
     }
     el.appendChild(body);dk.appendChild(el);
     const ti=document.createElement('div');
-    ti.className='taskbar-item'+(win.id===G.winId?' tb-active':'');
-    ti.id='tb-'+win.id;ti.textContent=win.title;tb.appendChild(ti);
+    ti.className='taskbar-item'+(win.id===activeWin?' tb-active':'');
+    ti.textContent=win.title;tb.appendChild(ti);
   });
-  document.getElementById('clipboard-content').textContent=G.clipboard||'(empty)';
 }
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -355,30 +467,17 @@ function renderProgress(){
   }
 }
 
-// ===== VISUALS =====
-function applyVis(v){
-  clearVis();if(!v||v==='none')return;
-  if(v==='flash-next-tab'){const ts=document.querySelectorAll('#win-browser .tab');const n=(G.tabIdx+1)%4;if(ts[n])ts[n].classList.add('flashing');}
-  if(v==='flash-prev-tab'){const ts=document.querySelectorAll('#win-browser .tab');const p=(G.tabIdx-1+4)%4;if(ts[p])ts[p].classList.add('flashing');}
-  if(v==='flash-tab-3'){const ts=document.querySelectorAll('#win-browser .tab');if(ts[2])ts[2].classList.add('flashing');}
-  if(v==='flash-current-tab'){const ts=document.querySelectorAll('#win-browser .tab');if(ts[G.tabIdx])ts[G.tabIdx].classList.add('flashing');}
-  if(v==='flash-window-document'){const w=document.getElementById('win-document');if(w)w.classList.add('flashing');const t=document.getElementById('tb-win-document');if(t)t.classList.add('tb-flashing');}
-  if(v==='flash-window-notepad'){const w=document.getElementById('win-notepad');if(w)w.classList.add('flashing');const t=document.getElementById('tb-win-notepad');if(t)t.classList.add('tb-flashing');}
-}
-function clearVis(){document.querySelectorAll('.flashing').forEach(e=>e.classList.remove('flashing'));document.querySelectorAll('.tb-flashing').forEach(e=>e.classList.remove('tb-flashing'));}
-
 // ===== HINTS =====
 function fmtKeys(keys){return keys.map(k=>'<span class="key-hint">'+(KEY_DISPLAY[k]||k)+'</span>').join(' + ');}
-
 function showHint(ch){
   const hEl=document.getElementById('shortcut-hint'),cdEl=document.getElementById('hint-countdown');
-  const dk=ch.dkeys||ch.keys, html=fmtKeys(dk);
-  if(G.level==='beginner'){hEl.innerHTML=html;hEl.classList.remove('delayed');hEl.classList.add('revealed');cdEl.textContent='';}
-  else if(G.level==='intermediate'){
+  const html=fmtKeys(ch.dkeys||ch.keys);
+  if(G.level===1){hEl.innerHTML=html;hEl.classList.remove('delayed');hEl.classList.add('revealed');cdEl.textContent='';}
+  else{
     hEl.innerHTML=html;hEl.classList.add('delayed');hEl.classList.remove('revealed');
     cdEl.textContent='Hint in 5s... Try yourself!';let cd=5;
     G.hintTimer=setInterval(()=>{cd--;if(cd<=0){clearInterval(G.hintTimer);hEl.classList.remove('delayed');hEl.classList.add('revealed');cdEl.textContent='';}else cdEl.textContent='Hint in '+cd+'s...';},1000);
-  } else {hEl.innerHTML='<span style="color:#666">No hints!</span>';hEl.classList.remove('delayed');hEl.classList.add('revealed');cdEl.textContent='';}
+  }
 }
 
 // ===== FEEDBACK =====
@@ -391,11 +490,10 @@ function startTimer(sec){
   G.chalTimer=setInterval(()=>{
     G.timeLeft-=0.1;const pct=Math.max(0,(G.timeLeft/sec)*100);
     fill.style.width=pct+'%';
-    fill.style.background=pct<=30?'linear-gradient(90deg,#e94560,#ff6b6b)':'linear-gradient(90deg,#e94560,#ffd700)';
+    fill.style.background=pct<=30?'linear-gradient(90deg,#e94560,#ff6b6b)':'linear-gradient(90deg,#4caf50,#ffd700)';
     if(G.timeLeft<=0){clearInterval(G.chalTimer);handleTimeout();}
   },100);
 }
-
 function handleTimeout(){
   G.waiting=true;G.streak=0;G.incorrect++;
   const dk=G.cur.dkeys||G.cur.keys;
@@ -405,59 +503,51 @@ function handleTimeout(){
   setTimeout(()=>{G.waiting=false;nextChal();},1800);
 }
 
-// ===== CHALLENGE FLOW =====
-function genChals(){
-  const s=[...ALL_CHALLENGES].sort(()=>Math.random()-.5);
-  G.challenges=s.slice(0,G.total);
-}
-
+// ===== CHALLENGE FLOW (L1/L2) =====
 function loadChal(i){
   if(i>=G.total){endGame();return;}
-  const ch=G.challenges[i];G.cur=ch;G.textSel={};
+  const ch=G.challenges[i]; G.cur=ch;
   G.mods.clear();updModVis();updCombo();
-  if(ch.setup)ch.setup(G);
-  renderDesktop();renderProgress();applyVis(ch.vis);
-  document.getElementById('challenge-instruction').innerHTML='<span style="color:#888;font-size:.85rem">'+ch.cat+'</span><br>'+ch.inst;
+  renderDesktop();renderProgress();
+  document.getElementById('challenge-instruction').innerHTML=ch.inst;
   document.getElementById('challenge-counter').textContent=(i+1)+' / '+G.total;
   showHint(ch);
-  startTimer(G.level==='expert'?10:G.level==='intermediate'?20:30);
+  startTimer(G.level===1?30:20);
 }
-
 function nextChal(){G.idx++;if(G.hintTimer)clearInterval(G.hintTimer);loadChal(G.idx);}
-
 function handleCorrect(){
   if(G.chalTimer)clearInterval(G.chalTimer);if(G.hintTimer)clearInterval(G.hintTimer);
   G.waiting=true;G.correct++;G.streak++;
   if(G.streak>G.bestStreak)G.bestStreak=G.streak;
   const tb=Math.floor(G.timeLeft*10),sb=(G.streak-1)*25;
-  const mult=G.level==='expert'?3:G.level==='intermediate'?2:1;
+  const mult=G.level===1?1:2;
   const pts=(100+tb+sb)*mult;G.score+=pts;
-  if(G.streak>=5&&G.streak%5===0)showFB('streak',G.streak+'x STREAK! +'+pts);
+  if(G.streak>=3&&G.streak%3===0)showFB('streak',G.streak+'x STREAK! +'+pts);
   else showFB('correct','Correct! +'+pts);
   updateUI();setTimeout(()=>{G.waiting=false;nextChal();},1200);
 }
-
 function handleWrong(){
   G.streak=0;G.incorrect++;
   const dk=G.cur.dkeys||G.cur.keys;
   showFB('incorrect','Wrong! Need: '+dk.map(k=>KEY_DISPLAY[k]||k).join(' + '));
   updateUI();
 }
-
 function updateUI(){document.getElementById('score').textContent=G.score;document.getElementById('streak').textContent=G.streak;}
 
-// ===== LIFECYCLE =====
+// ===== START GAME (L1/L2) =====
 function startGame(level){
-  G={level,score:0,streak:0,bestStreak:0,cur:null,idx:0,total:20,correct:0,incorrect:0,hintTimer:null,chalTimer:null,timeLeft:0,clipboard:'',winId:'win-browser',tabIdx:0,textSel:{},playing:true,challenges:[],mods:new Set(),waiting:false};
-  document.getElementById('level-indicator').textContent=level.toUpperCase();
-  document.getElementById('start-screen').classList.add('hidden');
-  document.getElementById('game-container').classList.add('active');
-  document.getElementById('result-screen').classList.remove('active');
-  genChals();renderProgress();updateUI();loadChal(0);
+  const chals = level===1 ? [...L1_CHALLENGES] : [...L2_CHALLENGES];
+  // Shuffle
+  for(let i=chals.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[chals[i],chals[j]]=[chals[j],chals[i]];}
+  G={level,score:0,streak:0,bestStreak:0,cur:null,idx:0,total:chals.length,correct:0,incorrect:0,hintTimer:null,chalTimer:null,timeLeft:0,playing:true,challenges:chals,mods:new Set(),waiting:false};
+  const li=document.getElementById('level-indicator');
+  if(level===1){li.textContent='LEVEL 1 - BEGINNER';li.className='lv-green';}
+  else{li.textContent='LEVEL 2 - INTERMEDIATE';li.className='lv-yellow';}
+  showScreen('game');
+  renderProgress();updateUI();loadChal(0);
 }
-
 function endGame(){
-  G.playing=false;if(G.chalTimer)clearInterval(G.chalTimer);if(G.hintTimer)clearInterval(G.hintTimer);clearVis();
+  G.playing=false;if(G.chalTimer)clearInterval(G.chalTimer);if(G.hintTimer)clearInterval(G.hintTimer);
   const tot=G.correct+G.incorrect,acc=tot>0?Math.round(G.correct/tot*100):0;
   document.getElementById('final-score').textContent=G.score;
   document.getElementById('final-correct').textContent=G.correct;
@@ -468,24 +558,163 @@ function endGame(){
   document.getElementById('result-screen').classList.add('active');
 }
 
-function returnToMenu(){
-  G.playing=false;if(G.chalTimer)clearInterval(G.chalTimer);if(G.hintTimer)clearInterval(G.hintTimer);
-  document.getElementById('game-container').classList.remove('active');
+// ===== LEVEL 3 EXPERT =====
+function startExpert(){
+  showScreen('expert');
+  EX.taskIdx=0;
+  buildTaskChips();
+  selectTask(0);
+}
+
+function buildTaskChips(){
+  const c=document.getElementById('task-chips');c.innerHTML='';
+  L3_TASKS.forEach((t,i)=>{
+    const chip=document.createElement('div');chip.className='task-chip'+(i===EX.taskIdx?' active':'');
+    const times=EX.times[t.id]||[];
+    chip.innerHTML=t.shortcut+'<span class="chip-count">('+times.length+'/10)</span>';
+    chip.addEventListener('click',()=>selectTask(i));
+    c.appendChild(chip);
+  });
+}
+
+function selectTask(i){
+  EX.taskIdx=i;
+  const t=L3_TASKS[i];
+  const times=EX.times[t.id]||[];
+  EX.attempt=times.length;
+
+  // Update chips
+  document.querySelectorAll('.task-chip').forEach((c,ci)=>c.classList.toggle('active',ci===i));
+
+  // Update display
+  document.getElementById('expert-task-name').textContent=t.shortcut;
+  document.getElementById('expert-scenario').textContent=t.scenario;
+  document.getElementById('expert-detail').textContent=t.detail;
+  document.getElementById('expert-attempt').textContent=times.length;
+  document.getElementById('expert-timer-display').textContent='0.00s';
+  document.getElementById('expert-timer-display').classList.remove('running');
+
+  // Reset buttons
+  document.getElementById('btn-start-task').style.display='inline-block';
+  document.getElementById('btn-return-task').style.display='none';
+  if(times.length>=10){
+    document.getElementById('btn-start-task').textContent='All 10 done! Start again?';
+  } else {
+    document.getElementById('btn-start-task').textContent='Start Task';
+  }
+
+  // Stop any running timer
+  if(EX.timerInterval){clearInterval(EX.timerInterval);EX.timerInterval=null;}
+  EX.timing=false;
+
+  renderHistory(t.id);
+}
+
+function startTask(){
+  const t=L3_TASKS[EX.taskIdx];
+  const times=EX.times[t.id]||[];
+  if(times.length>=10){EX.times[t.id]=[];saveTimes();selectTask(EX.taskIdx);return;}
+
+  EX.timing=true;
+  EX.startTime=performance.now();
+  document.getElementById('btn-start-task').style.display='none';
+  document.getElementById('btn-return-task').style.display='inline-block';
+  const disp=document.getElementById('expert-timer-display');
+  disp.classList.add('running');
+
+  EX.timerInterval=setInterval(()=>{
+    const elapsed=(performance.now()-EX.startTime)/1000;
+    disp.textContent=elapsed.toFixed(2)+'s';
+  },50);
+}
+
+function returnTask(){
+  if(!EX.timing)return;
+  EX.timing=false;
+  clearInterval(EX.timerInterval);EX.timerInterval=null;
+
+  const elapsed=(performance.now()-EX.startTime)/1000;
+  const t=L3_TASKS[EX.taskIdx];
+  if(!EX.times[t.id])EX.times[t.id]=[];
+  EX.times[t.id].push(parseFloat(elapsed.toFixed(2)));
+  saveTimes();
+
+  document.getElementById('expert-timer-display').textContent=elapsed.toFixed(2)+'s';
+  document.getElementById('expert-timer-display').classList.remove('running');
+  document.getElementById('btn-start-task').style.display='inline-block';
+  document.getElementById('btn-return-task').style.display='none';
+
+  const times=EX.times[t.id];
+  EX.attempt=times.length;
+  document.getElementById('expert-attempt').textContent=times.length;
+  if(times.length>=10){
+    document.getElementById('btn-start-task').textContent='All 10 done! Start again?';
+  } else {
+    document.getElementById('btn-start-task').textContent='Start Task ('+times.length+'/10)';
+  }
+
+  buildTaskChips();
+  renderHistory(t.id);
+}
+
+function renderHistory(taskId){
+  const times=EX.times[taskId]||[];
+  const grid=document.getElementById('history-grid');grid.innerHTML='';
+  const chart=document.getElementById('expert-chart');chart.innerHTML='';
+  if(!times.length)return;
+
+  const best=Math.min(...times);
+  const max=Math.max(...times);
+
+  times.forEach((t,i)=>{
+    const item=document.createElement('div');
+    item.className='history-item'+(t===best?' best':'');
+    item.innerHTML='<span class="attempt-num">#'+(i+1)+'</span>'+t.toFixed(2)+'s';
+    grid.appendChild(item);
+
+    // Bar
+    const bar=document.createElement('div');
+    bar.className='chart-bar'+(t===best?' best-bar':'');
+    const h=max>0?Math.max(8,(t/max)*80):8;
+    bar.style.height=h+'px';
+    bar.innerHTML='<span class="chart-bar-label">'+t.toFixed(1)+'s</span>';
+    chart.appendChild(bar);
+  });
+}
+
+function saveTimes(){
+  try{localStorage.setItem('quickkeys_l3_times',JSON.stringify(EX.times));}catch(e){}
+}
+
+// ===== SCREEN MANAGEMENT =====
+function showScreen(name){
+  document.getElementById('start-screen').classList.toggle('hidden',name!=='start');
+  document.getElementById('game-screen').classList.toggle('active',name==='game');
+  document.getElementById('expert-screen').classList.toggle('active',name==='expert');
   document.getElementById('result-screen').classList.remove('active');
-  document.getElementById('start-screen').classList.remove('hidden');
+}
+function returnToMenu(){
+  G.playing=false;
+  if(G.chalTimer)clearInterval(G.chalTimer);
+  if(G.hintTimer)clearInterval(G.hintTimer);
+  if(EX.timerInterval){clearInterval(EX.timerInterval);EX.timerInterval=null;}
+  EX.timing=false;
+  showScreen('start');
 }
 
 // ===== WIRING =====
-document.getElementById('btn-beginner').addEventListener('click',()=>startGame('beginner'));
-document.getElementById('btn-intermediate').addEventListener('click',()=>startGame('intermediate'));
-document.getElementById('btn-expert').addEventListener('click',()=>startGame('expert'));
-document.getElementById('btn-menu').addEventListener('click',()=>returnToMenu());
-document.getElementById('btn-play-again').addEventListener('click',()=>returnToMenu());
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&G.playing)returnToMenu();});
+document.getElementById('btn-l1').addEventListener('click',()=>startGame(1));
+document.getElementById('btn-l2').addEventListener('click',()=>startGame(2));
+document.getElementById('btn-l3').addEventListener('click',()=>startExpert());
+document.getElementById('btn-menu').addEventListener('click',returnToMenu);
+document.getElementById('btn-play-again').addEventListener('click',returnToMenu);
+document.getElementById('expert-menu-btn').addEventListener('click',returnToMenu);
+document.getElementById('btn-start-task').addEventListener('click',startTask);
+document.getElementById('btn-return-task').addEventListener('click',returnTask);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){returnToMenu();}});
 
 // ===== INIT =====
 buildKeyboard();
-renderDesktop();
 </script>
 </body>
 </html>
