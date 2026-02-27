@@ -1,0 +1,733 @@
+/* style.css — Quick Key Quest — Windows 11 inspired aesthetic */
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f3f3f3;
+  color: #1a1a1a;
+  min-height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ===== Screens ===== */
+.screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+}
+.screen.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== HOME SCREEN — Windows Desktop ===== */
+#home-screen {
+  /* Windows 11 default wallpaper vibe — soft blue gradient */
+  background: linear-gradient(135deg, #1b6ef3 0%, #89b4fa 40%, #cbe0ff 70%, #f0f4ff 100%);
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+/* Main panel — frosted glass card */
+.home-panel {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  padding: 2.5rem 3rem;
+  max-width: 780px;
+  width: 100%;
+  text-align: center;
+}
+
+.home-panel h1 {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: #0050d4;
+  margin-bottom: 0.3rem;
+  letter-spacing: -0.5px;
+}
+.home-panel h1 span {
+  color: #e81c4f;
+}
+
+.home-subtitle {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1.6rem;
+}
+
+/* Instructions box */
+.instructions-box {
+  background: rgba(0, 80, 212, 0.06);
+  border: 1px solid rgba(0, 80, 212, 0.15);
+  border-radius: 8px;
+  padding: 1rem 1.4rem;
+  margin-bottom: 1.8rem;
+  text-align: left;
+}
+.instructions-box h3 {
+  font-size: 0.9rem;
+  color: #0050d4;
+  margin-bottom: 0.4rem;
+}
+.instructions-box p {
+  font-size: 0.82rem;
+  color: #444;
+  line-height: 1.55;
+}
+
+/* Level grid — 4x2 */
+#level-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.level-card {
+  background: #fff;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem 0.6rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+.level-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+.level-card:active {
+  transform: translateY(0);
+}
+
+.level-number {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.3rem;
+}
+.level-label {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+.level-type {
+  font-size: 0.7rem;
+  color: #777;
+  margin-bottom: 0.3rem;
+}
+.level-score {
+  font-size: 0.72rem;
+  font-weight: 600;
+  min-height: 1em;
+}
+
+/* Color variants */
+.level-card-green {
+  border-color: #4caf50;
+}
+.level-card-green .level-number { color: #4caf50; }
+.level-card-green .level-label { color: #2e7d32; }
+.level-card-green .level-score { color: #4caf50; }
+.level-card-green:hover { border-color: #2e7d32; background: #f0fff0; }
+
+.level-card-yellow {
+  border-color: #f9a825;
+}
+.level-card-yellow .level-number { color: #f9a825; }
+.level-card-yellow .level-label { color: #e65100; }
+.level-card-yellow .level-score { color: #f9a825; }
+.level-card-yellow:hover { border-color: #e65100; background: #fffde7; }
+
+.level-card-red {
+  border-color: #e53935;
+}
+.level-card-red .level-number { color: #e53935; }
+.level-card-red .level-label { color: #b71c1c; }
+.level-card-red .level-score { color: #e53935; }
+.level-card-red:hover { border-color: #b71c1c; background: #fff5f5; }
+
+.level-card.completed {
+  position: relative;
+}
+.level-card.completed::after {
+  content: '\2713';
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 0.9rem;
+  color: #4caf50;
+  font-weight: bold;
+}
+
+/* ===== GAME SCREEN ===== */
+#game-screen {
+  background: #e8e8e8;
+}
+
+/* Top bar */
+.game-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  padding: 0.4rem 1rem;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.btn-back {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #555;
+  transition: background 0.15s;
+}
+.btn-back:hover {
+  background: #f0f0f0;
+}
+
+.game-info {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  font-size: 0.85rem;
+  color: #444;
+}
+.game-info span {
+  font-weight: 600;
+}
+
+/* Simulated desktop area (top ~60%) */
+.desktop-area {
+  flex: 6;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+}
+
+/* Chrome browser simulation */
+.browser-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0.5rem 0.5rem 0;
+  background: #fff;
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Tab bar */
+.browser-tabs {
+  display: flex;
+  align-items: center;
+  background: #dee1e6;
+  padding: 0.35rem 0.5rem 0;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.browser-tab {
+  background: #e8eaed;
+  border-radius: 8px 8px 0 0;
+  padding: 0.35rem 1rem;
+  font-size: 0.72rem;
+  color: #555;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-bottom: none;
+}
+.browser-tab.active {
+  background: #fff;
+  color: #1a1a1a;
+  border-color: #ddd;
+}
+
+/* URL bar */
+.browser-url-bar {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 0.3rem 0.8rem;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+}
+.browser-url-bar .url-icon {
+  font-size: 0.7rem;
+  color: #999;
+  margin-right: 0.5rem;
+}
+.browser-url-bar .url-text {
+  font-size: 0.75rem;
+  color: #555;
+  background: #f1f3f4;
+  border-radius: 20px;
+  padding: 0.25rem 0.8rem;
+  flex: 1;
+}
+
+/* Browser content area */
+.browser-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+/* Taskbar */
+.taskbar {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #ddd;
+  padding: 0.3rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+.taskbar-icon {
+  width: 28px;
+  height: 28px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #666;
+  cursor: default;
+}
+.taskbar-icon:hover {
+  background: #d0d0d0;
+}
+
+/* ===== Task Prompts (inside browser content) ===== */
+.task-prompt {
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+.task-action {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.8rem;
+}
+.task-combo {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0050d4;
+  padding: 0.5rem 1.2rem;
+  background: rgba(0, 80, 212, 0.08);
+  border-radius: 8px;
+  display: inline-block;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+.task-combo-hidden {
+  color: #aaa;
+  background: #f0f0f0;
+  font-size: 2rem;
+  min-width: 120px;
+}
+.task-combo-revealed {
+  animation: revealPop 0.4s ease;
+  color: #0050d4;
+  background: rgba(0, 80, 212, 0.08);
+}
+
+.countdown-display {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #e53935;
+  margin-top: 0.6rem;
+}
+
+/* Practice task */
+.practice-task {
+  text-align: center;
+  max-width: 550px;
+  animation: fadeIn 0.3s ease;
+}
+.practice-instruction {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+}
+.practice-hints {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+.hint-chip {
+  background: #e8f0fe;
+  color: #0050d4;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+.hint-chip small {
+  color: #666;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.practice-controls {
+  margin-top: 0.8rem;
+}
+
+.btn-start-timer, .btn-done {
+  padding: 0.65rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-start-timer {
+  background: #0050d4;
+  color: #fff;
+}
+.btn-start-timer:hover {
+  background: #003da5;
+}
+
+.btn-done {
+  background: #4caf50;
+  color: #fff;
+  font-size: 1.1rem;
+}
+.btn-done:hover {
+  background: #388e3c;
+}
+
+.practice-elapsed {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0050d4;
+  margin-top: 0.6rem;
+  font-family: 'Consolas', monospace;
+}
+
+/* ===== Feedback Overlay ===== */
+.feedback-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  padding: 0.6rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.feedback-overlay.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.feedback-correct {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 2px solid #4caf50;
+}
+.feedback-incorrect {
+  background: #ffebee;
+  color: #c62828;
+  border: 2px solid #e53935;
+}
+.feedback-overlay span {
+  margin-right: 0.3rem;
+}
+
+/* ===== VIRTUAL KEYBOARD ===== */
+/* Virtual keyboard area (bottom ~40%) */
+.keyboard-area {
+  flex: 4;
+  background: #e0e0e0;
+  border-top: 2px solid #ccc;
+  padding: 0.4rem 0.5rem 0.5rem;
+  overflow-x: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 1050px;
+  width: 100%;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+}
+
+.keyboard-row.fn-row .key {
+  height: 1.8rem;
+  font-size: 0.55rem;
+}
+
+.key {
+  height: 2.4rem;
+  background: #fff;
+  border: 1px solid #c0c0c0;
+  border-bottom: 3px solid #aaa;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  font-family: 'Segoe UI', sans-serif;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.08s, transform 0.08s, border-color 0.08s;
+  white-space: nowrap;
+  padding: 0 0.2rem;
+}
+
+.key:hover {
+  background: #e8f0fe;
+  border-color: #90b4f8;
+}
+
+.key:active, .key.pressed {
+  background: #d0e0fc;
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+}
+
+.key.modifier {
+  background: #e8e8e8;
+  font-weight: 600;
+  color: #555;
+}
+
+.key.held {
+  background: #bbdefb;
+  border-color: #1976d2;
+  color: #0d47a1;
+  box-shadow: 0 0 6px rgba(25, 118, 210, 0.3);
+}
+
+.key.hint {
+  background: #fff9c4;
+  border-color: #f9a825;
+  animation: hintPulse 1.2s ease-in-out infinite;
+}
+
+.key.correct-flash {
+  background: #c8e6c9 !important;
+  border-color: #4caf50 !important;
+  color: #2e7d32 !important;
+}
+
+.key.incorrect-flash {
+  background: #ffcdd2 !important;
+  border-color: #e53935 !important;
+  color: #b71c1c !important;
+}
+
+.key.space-key {
+  font-size: 0;
+}
+
+.key-spacer {
+  flex-shrink: 0;
+}
+
+.keyboard-disabled .key {
+  opacity: 0.5;
+  cursor: default;
+}
+.keyboard-disabled .key:hover {
+  background: #fff;
+  border-color: #c0c0c0;
+}
+
+/* ===== Results Screen ===== */
+.results-screen {
+  text-align: center;
+  animation: fadeIn 0.4s ease;
+  max-width: 500px;
+  width: 100%;
+}
+.results-screen h2 {
+  font-size: 1.6rem;
+  color: #1a1a1a;
+  margin-bottom: 0.3rem;
+}
+.results-grade {
+  font-size: 1.1rem;
+  color: #0050d4;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+.results-total {
+  margin-bottom: 0.6rem;
+}
+.results-score {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #0050d4;
+}
+.results-max {
+  font-size: 1.4rem;
+  color: #999;
+}
+
+.results-bar-container {
+  width: 100%;
+  height: 10px;
+  background: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 1.2rem;
+}
+.results-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #81c784);
+  border-radius: 5px;
+  transition: width 0.6s ease;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.2rem;
+  font-size: 0.82rem;
+}
+.results-table th {
+  background: #f5f5f5;
+  padding: 0.4rem 0.6rem;
+  color: #666;
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+}
+.results-table td {
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+.result-correct td:last-child {
+  color: #2e7d32;
+  font-weight: 600;
+}
+.result-incorrect td:last-child {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.bonus-tag {
+  background: #fff3e0;
+  color: #e65100;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-weight: 600;
+  margin-left: 0.3rem;
+}
+
+.btn-return {
+  background: #0050d4;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.8rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-return:hover {
+  background: #003da5;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes revealPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes hintPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(249, 168, 37, 0.4); }
+  50% { box-shadow: 0 0 8px 3px rgba(249, 168, 37, 0.4); }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  #level-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .home-panel {
+    padding: 1.5rem;
+  }
+  .home-panel h1 {
+    font-size: 2rem;
+  }
+  .keyboard-area {
+    padding: 0.3rem;
+  }
+  .key {
+    height: 2rem;
+    font-size: 0.6rem;
+  }
+  .keyboard-row.fn-row .key {
+    height: 1.5rem;
+    font-size: 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  #level-grid {
+    grid-template-columns: 1fr;
+  }
+  .task-action {
+    font-size: 1.3rem;
+  }
+  .task-combo {
+    font-size: 1.1rem;
+  }
+}
